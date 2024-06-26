@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBomb } from '@fortawesome/free-solid-svg-icons';
-import { flash, bounce } from 'react-animations';
+import { flash } from 'react-animations';
 
 // Initialize the Tic-Tac-Toe board and bombs
 const initializeBoard = () => [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
@@ -76,7 +76,6 @@ const bombAnimation = keyframes`${flash}`;
 const BombAnimationDiv = styled.div`
   animation: 1s ${bombAnimation};
 `;
-
 
 const NewGameButton = styled.button`
   font-size: 16px;
@@ -414,6 +413,8 @@ const App = () => {
     <AppContainer>
       <h1 style={{color:"green"}}>Tic-Tac-Toe with Bombs</h1>
       <div style={{color: "green"}}>{message}</div>
+      <div style={{color: "blue"}}>Player Bombs: Row - {playerBombs.row}, Column - {playerBombs.col}</div>
+      <div style={{color: "red"}}>AI Bombs: Row - {aiBombs.row}, Column - {aiBombs.col}</div>
       <BoardContainer>
         <GameBoard>
           {board.map((row, rowIndex) => (
