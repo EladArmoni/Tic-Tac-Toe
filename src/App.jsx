@@ -462,7 +462,7 @@ const App = () => {
             <BombIcon id="colBombButton" icon={faBomb} onClick={() => placeBomb('col')} />
           </div>
         </BombControlsContainer>
-        <NewGameButton onClick={newGame}>New Game</NewGameButton>
+        <NewGameButton onClick={()=>newGame()}>New Game</NewGameButton>
       </BoardContainer>
     </AppContainer>
   );
