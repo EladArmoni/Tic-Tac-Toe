@@ -1,12 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import styled, { keyframes } from 'styled-components';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBomb } from '@fortawesome/free-solid-svg-icons';
-import { flash } from 'react-animations';
+import React, { useState, useEffect } from "react";
+import styled, { keyframes } from "styled-components";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBomb } from "@fortawesome/free-solid-svg-icons";
+import { flash } from "react-animations";
 
 // Initialize the Tic-Tac-Toe board and bombs
-const initializeBoard = () => [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
-const initializeBombs = () => [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+const initializeBoard = () => [
+  [-2, -2, 0, -2, -2],
+  [-2, 0, 0, 0, -2],
+  [-2, 0, 0, 0, -2],
+  [-2, 0, 0, 0, 0],
+  [0, -2, -2, -2, -2],
+];
+const initializeBombs = () => [
+  [-2, -2, 0, -2, -2],
+  [-2, 0, 0, 0, -2],
+  [-2, 0, 0, 0, -2],
+  [-2, 0, 0, 0, 0],
+  [0, -2, -2, -2, -2],
+];
 const initialPlayerBombs = { row: 1, col: 1 };
 const initialAiBombs = { row: 1, col: 1 };
 
@@ -45,7 +57,7 @@ const BombIcon = styled(FontAwesomeIcon)`
 
 const GameBoard = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, 50px);
+  grid-template-columns: repeat(5, 50px);
   gap: 5px;
 `;
 
@@ -56,11 +68,12 @@ const CellButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${({ value }) => (value === 1 ? 'blue' : value === -1 ? 'red' : 'black')};
+  color: ${({ value }) =>
+    value === 1 ? "blue" : value === -1 ? "red" : "black"};
   background-color: #f0f0f0; /* Default background color */
   border: 1px solid #ccc;
   transition: background-color 0.3s ease;
-
+  visibility: ${({ value }) => (value === -2 ? "hidden" : "visible")};
   &:hover {
     background-color: #e0e0e0; /* Lighter background on hover */
   }
@@ -81,7 +94,7 @@ const NewGameButton = styled.button`
   font-size: 16px;
   padding: 10px 20px;
   margin-top: 20px;
-  background-color: #4CAF50; /* Green background */
+  background-color: #4caf50; /* Green background */
   border: none;
   color: white; /* White text */
   text-align: center;
@@ -101,8 +114,8 @@ const App = () => {
   const [bombs, setBombs] = useState(initializeBombs());
   const [playerBombs, setPlayerBombs] = useState(initialPlayerBombs);
   const [aiBombs, setAiBombs] = useState(initialAiBombs);
-  const [turn, setTurn] = useState('Player');
-  const [message, setMessage] = useState('');
+  const [turn, setTurn] = useState("Player");
+  const [message, setMessage] = useState("");
   const [selectedRow, setSelectedRow] = useState(0); // Default selected row
   const [selectedCol, setSelectedCol] = useState(0); // Default selected column
   const [winner, setWinner] = useState(null); // New state for winner
@@ -112,11 +125,12 @@ const App = () => {
   }, []);
 
   const newGame = () => {
+    console.log("reset");
     setBoard(initializeBoard());
     setBombs(initializeBombs());
     setPlayerBombs(initialPlayerBombs);
     setAiBombs(initialAiBombs);
-    setTurn('Player');
+    setTurn("Player");
     setMessage("Player's Turn");
     setWinner(null); // Reset winner state
   };
@@ -129,11 +143,11 @@ const App = () => {
   };
 
   const handleCellClick = (row, col) => {
-    if (turn === 'Player' && board[row][col] === 0 && bombs[row][col] === 0) {
+    if (turn === "Player" && board[row][col] === 0 && bombs[row][col] === 0) {
       setMove(board, row, col, 1);
       updateBoard(board, bombs, playerBombs, aiBombs);
       if (!gameWon(board) && !boardFull(board)) {
-        setTurn('AI');
+        setTurn("AI");
         setMessage("AI's Turn");
         setTimeout(() => handleAIMove(), 500);
       } else {
@@ -147,7 +161,7 @@ const App = () => {
     oComp(newBoard, bombs, aiBombs, playerBombs);
     setBoard(newBoard);
     if (!gameWon(newBoard) && !boardFull(newBoard)) {
-      setTurn('Player');
+      setTurn("Player");
       setMessage("Player's Turn");
     } else {
       checkGameResult(newBoard);
@@ -155,20 +169,20 @@ const App = () => {
   };
 
   const placeBomb = (type) => {
-    if (type === 'row' && playerBombs.row > 0) {
-      detonateBomb(board, bombs, selectedRow, 'row');
+    if (type === "row" && playerBombs.row > 0) {
+      detonateBomb(board, bombs, selectedRow, "row");
       setPlayerBombs({ ...playerBombs, row: playerBombs.row - 1 });
       if (playerBombs.row - 1 === 0) {
-        document.getElementById('rowBombButton').classList.add('disabled');
+        document.getElementById("rowBombButton").classList.add("disabled");
       }
-    } else if (type === 'col' && playerBombs.col > 0) {
-      detonateBomb(board, bombs, selectedCol, 'col');
+    } else if (type === "col" && playerBombs.col > 0) {
+      detonateBomb(board, bombs, selectedCol, "col");
       setPlayerBombs({ ...playerBombs, col: playerBombs.col - 1 });
       if (playerBombs.col - 1 === 0) {
-        document.getElementById('colBombButton').classList.add('disabled');
+        document.getElementById("colBombButton").classList.add("disabled");
       }
     }
-    setTurn('AI');
+    setTurn("AI");
     setMessage("AI's Turn");
     setTimeout(() => handleAIMove(), 500);
   };
@@ -178,46 +192,53 @@ const App = () => {
   };
 
   const boardFull = (board) => {
-    return board.flat().every(cell => cell !== 0);
+    return board.flat().every((cell) => cell !== 0);
   };
 
   const checkGameResult = (board) => {
     if (winningPlayer(board, 1)) {
       setMessage("Player has won!");
-      setWinner('Player'); // Set winner state
+      setWinner("Player"); // Set winner state
       disableBoard();
     } else if (winningPlayer(board, -1)) {
       setMessage("AI has won!");
-      setWinner('AI'); // Set winner state
+      setWinner("AI"); // Set winner state
       disableBoard();
     } else if (boardFull(board)) {
       setMessage("The game is a draw.");
-      setWinner('Draw'); // Set winner state
+      setWinner("Draw"); // Set winner state
       disableBoard();
     }
   };
 
   const disableBoard = () => {
-    const cells = document.querySelectorAll('button');
-    cells.forEach(cell => {
+    const cells = document.querySelectorAll('button:not([value="new game"])'); // Exclude New Game button
+    console.log(cells);
+    cells.forEach((cell) => {
       cell.disabled = true;
     });
-    document.getElementById('rowBombButton').classList.add('disabled');
-    document.getElementById('colBombButton').classList.add('disabled');
+    document.getElementById("rowBombButton").classList.add("disabled");
+    document.getElementById("colBombButton").classList.add("disabled");
   };
 
   const winningPlayer = (board, player) => {
     const conditions = [
-      [board[0][0], board[0][1], board[0][2]],
-      [board[1][0], board[1][1], board[1][2]],
-      [board[2][0], board[2][1], board[2][2]],
-      [board[0][0], board[1][0], board[2][0]],
-      [board[0][1], board[1][1], board[2][1]],
-      [board[0][2], board[1][2], board[2][2]],
-      [board[0][0], board[1][1], board[2][2]],
-      [board[0][2], board[1][1], board[2][0]]
+      [board[0][2], board[1][2], board[2][2]], //top cell rule
+      [board[3][2], board[3][3], board[3][4]], //right cell rule
+      [board[1][2], board[2][3], board[3][4]], //right cell rule
+      [board[4][0], board[3][1], board[2][2]], //bottom left cell rule
+      [board[1][1], board[1][2], board[1][3]],
+      [board[2][1], board[2][2], board[2][3]],
+      [board[3][1], board[3][2], board[3][3]],
+      [board[1][1], board[2][1], board[3][1]],
+      [board[1][2], board[2][2], board[3][2]],
+      [board[1][3], board[2][3], board[3][3]],
+      [board[1][1], board[2][2], board[3][3]],
+      [board[1][3], board[2][2], board[3][1]],
     ];
-    return conditions.some(condition => condition.every(cell => cell === player));
+    return conditions.some((condition) =>
+      condition.every((cell) => cell === player)
+    );
   };
 
   const setMove = (board, x, y, player) => {
@@ -229,16 +250,26 @@ const App = () => {
   const detonateBomb = (board, bombs, index, bomb_type) => {
     const newBoard = [...board];
     const newBombs = [...bombs];
-    if (bomb_type === 'row') {
-      for (let i = 0; i < 3; i++) {
-        newBoard[index][i] = 0;
-        newBombs[index][i] = 0;
+    if (bomb_type === "row") {
+      for (let i = 0; i < 5; i++) {
+        if (newBoard[index][i] === -2) {
+          newBoard[index][i] = -2;
+          newBombs[index][i] = -2;
+        } else {
+          newBoard[index][i] = 0;
+          newBombs[index][i] = 0;
+        }
         addBombAnimation(index, i); // Add animation
       }
-    } else if (bomb_type === 'col') {
-      for (let i = 0; i < 3; i++) {
-        newBoard[i][index] = 0;
-        newBombs[i][index] = 0;
+    } else if (bomb_type === "col") {
+      for (let i = 0; i < 5; i++) {
+        if (newBoard[index][i] === -2) {
+          newBoard[index][i] = -2;
+          newBombs[index][i] = -2;
+        } else {
+          newBoard[index][i] = 0;
+          newBombs[index][i] = 0;
+        }
         addBombAnimation(i, index); // Add animation
       }
     }
@@ -250,9 +281,9 @@ const App = () => {
   const addBombAnimation = (row, col) => {
     const cell = document.getElementById(`cell-${row}-${col}`);
     if (cell) {
-      cell.classList.add('bomb-animation');
+      cell.classList.add("bomb-animation");
       setTimeout(() => {
-        cell.classList.remove('bomb-animation');
+        cell.classList.remove("bomb-animation");
       }, 1000); // Duration of animation
     }
   };
@@ -271,7 +302,16 @@ const App = () => {
     return evaluate(board);
   };
 
-  const abminimax = (board, bombs, depth, alpha, beta, player, playerBombs, aiBombs) => {
+  const abminimax = (
+    board,
+    bombs,
+    depth,
+    alpha,
+    beta,
+    player,
+    playerBombs,
+    aiBombs
+  ) => {
     let row = -1;
     let col = -1;
     let bombMove = null;
@@ -284,7 +324,16 @@ const App = () => {
 
     for (let cell of moves) {
       setMove(board, cell[0], cell[1], player);
-      let score = abminimax(board, bombs, depth - 1, alpha, beta, -player, playerBombs, aiBombs)[2];
+      let score = abminimax(
+        board,
+        bombs,
+        depth - 1,
+        alpha,
+        beta,
+        -player,
+        playerBombs,
+        aiBombs
+      )[2];
       setMove(board, cell[0], cell[1], 0);
       if (player === 1) {
         if (score > bestScore) {
@@ -305,18 +354,32 @@ const App = () => {
         break;
       }
     }
+    // [-2, -2, 0, -2, -2],
+    // [-2, 1, 0, 0, -2],
+    // [-2, 0, 0, 0, -2],
+    // [-2, 0, 0, 0, 0],
+    // [0, -2, -2, -2, -2],
 
     // Consider using bombs
     if (player === 1 && playerBombs.row > 0) {
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 5; i++) {
         if (bombs[i].some((bomb, j) => bomb === 0 && board[i][j] !== 0)) {
           const tempRow = [...board[i]];
-          detonateBomb(board, bombs, i, 'row');
-          let score = abminimax(board, bombs, depth - 1, alpha, beta, -player, playerBombs, aiBombs);
+          detonateBomb(board, bombs, i, "row");
+          let score = abminimax(
+            board,
+            bombs,
+            depth - 1,
+            alpha,
+            beta,
+            -player,
+            playerBombs,
+            aiBombs
+          );
           board[i] = tempRow;
           if (score[2] > bestScore) {
             bestScore = score[2];
-            bombMove = ['row', i];
+            bombMove = ["row", i];
             alpha = Math.max(alpha, bestScore);
             if (alpha >= beta) break;
           }
@@ -327,13 +390,22 @@ const App = () => {
     if (player === 1 && playerBombs.col > 0) {
       for (let j = 0; j < 3; j++) {
         if (bombs.some((row, i) => row[j] === 0 && board[i][j] !== 0)) {
-          const tempCol = board.map(row => row[j]);
-          detonateBomb(board, bombs, j, 'col');
-          let score = abminimax(board, bombs, depth - 1, alpha, beta, -player, playerBombs, aiBombs);
+          const tempCol = board.map((row) => row[j]);
+          detonateBomb(board, bombs, j, "col");
+          let score = abminimax(
+            board,
+            bombs,
+            depth - 1,
+            alpha,
+            beta,
+            -player,
+            playerBombs,
+            aiBombs
+          );
           for (let i = 0; i < 3; i++) board[i][j] = tempCol[i];
           if (score[2] > bestScore) {
             bestScore = score[2];
-            bombMove = ['col', j];
+            bombMove = ["col", j];
             alpha = Math.max(alpha, bestScore);
             if (alpha >= beta) break;
           }
@@ -345,12 +417,21 @@ const App = () => {
       for (let i = 0; i < 3; i++) {
         if (bombs[i].some((bomb, j) => bomb === 0 && board[i][j] !== 0)) {
           const tempRow = [...board[i]];
-          detonateBomb(board, bombs, i, 'row');
-          let score = abminimax(board, bombs, depth - 1, alpha, beta, -player, playerBombs, aiBombs);
+          detonateBomb(board, bombs, i, "row");
+          let score = abminimax(
+            board,
+            bombs,
+            depth - 1,
+            alpha,
+            beta,
+            -player,
+            playerBombs,
+            aiBombs
+          );
           board[i] = tempRow;
           if (score[2] < bestScore) {
             bestScore = score[2];
-            bombMove = ['row', i];
+            bombMove = ["row", i];
             beta = Math.min(beta, bestScore);
             if (alpha >= beta) break;
           }
@@ -361,13 +442,22 @@ const App = () => {
     if (player === -1 && aiBombs.col > 0) {
       for (let j = 0; j < 3; j++) {
         if (bombs.some((row, i) => row[j] === 0 && board[i][j] !== 0)) {
-          const tempCol = board.map(row => row[j]);
-          detonateBomb(board, bombs, j, 'col');
-          let score = abminimax(board, bombs, depth - 1, alpha, beta, -player, playerBombs, aiBombs);
+          const tempCol = board.map((row) => row[j]);
+          detonateBomb(board, bombs, j, "col");
+          let score = abminimax(
+            board,
+            bombs,
+            depth - 1,
+            alpha,
+            beta,
+            -player,
+            playerBombs,
+            aiBombs
+          );
           for (let i = 0; i < 3; i++) board[i][j] = tempCol[i];
           if (score[2] < bestScore) {
             bestScore = score[2];
-            bombMove = ['col', j];
+            bombMove = ["col", j];
             beta = Math.min(beta, bestScore);
             if (alpha >= beta) break;
           }
@@ -379,18 +469,28 @@ const App = () => {
   };
 
   const oComp = (board, bombs, aiBombs, playerBombs) => {
-    if (blanks(board).length === 9) {
-      const x = Math.floor(Math.random() * 3);
-      const y = Math.floor(Math.random() * 3);
+    const availableMoves = blanks(board);
+    if (availableMoves.length >= 11) {
+      const [x, y] =
+        availableMoves[Math.floor(Math.random() * availableMoves.length)];
       setMove(board, x, y, -1);
     } else {
-      const result = abminimax(board, bombs, blanks(board).length, -Infinity, Infinity, -1, playerBombs, aiBombs);
+      const result = abminimax(
+        board,
+        bombs,
+        availableMoves.length,
+        -Infinity,
+        Infinity,
+        -1,
+        playerBombs,
+        aiBombs
+      );
       if (result[3]) {
         const [bombType, index] = result[3];
         detonateBomb(board, bombs, index, bombType);
         aiBombs[bombType] -= 1;
       } else {
-        setMove(board, result[0], result[1], -1);
+      setMove(board, result[0], result[1], -1);
       }
     }
     setBoard([...board]);
@@ -399,8 +499,8 @@ const App = () => {
 
   const blanks = (board) => {
     const moves = [];
-    for (let i = 0; i < 3; i++) {
-      for (let j = 0; j < 3; j++) {
+    for (let i = 0; i < board.length; i++) {
+      for (let j = 0; j < board[0].length; j++) {
         if (board[i][j] === 0) {
           moves.push([i, j]);
         }
@@ -408,31 +508,45 @@ const App = () => {
     }
     return moves;
   };
-  
+
   return (
     <AppContainer>
-      <h1 style={{color:"green"}}>Tic-Tac-Toe with Bombs</h1>
-      <div style={{color: "green"}}>{message}</div>
-      <div style={{color: "blue"}}>Player Bombs: Row - {playerBombs.row}, Column - {playerBombs.col}</div>
-      <div style={{color: "red"}}>AI Bombs: Row - {aiBombs.row}, Column - {aiBombs.col}</div>
+      <h1 style={{ color: "green" }}>Tic-Tac-Toe with Bombs</h1>
+      <div style={{ color: "green" }}>{message}</div>
+      <div style={{ color: "blue" }}>
+        Player Bombs: Row - {playerBombs.row}, Column - {playerBombs.col}
+      </div>
+      <div style={{ color: "red" }}>
+        AI Bombs: Row - {aiBombs.row}, Column - {aiBombs.col}
+      </div>
       <BoardContainer>
         <GameBoard>
-          {board.map((row, rowIndex) => (
+          {board.map((row, rowIndex) =>
             row.map((cell, colIndex) => (
               <CellButton
                 key={`${rowIndex}-${colIndex}`}
                 onClick={() => handleCellClick(rowIndex, colIndex)}
                 value={cell}
                 id={`cell-${rowIndex}-${colIndex}`}
-                className={bombs[rowIndex][colIndex] === 1 ? 'bomb' : ''}
+                className={
+                  cell === -2
+                    ? "hidden"
+                    : bombs[rowIndex][colIndex] === 1
+                    ? "bomb"
+                    : ""
+                }
                 disabled={winner !== null}
               >
-                {cell === 1 && 'X'}
-                {cell === -1 && 'O'}
-                {bombs[rowIndex][colIndex] === 1 && <BombAnimationDiv><BombIcon icon={faBomb} /></BombAnimationDiv>}
+                {cell === 1 && "X"}
+                {cell === -1 && "O"}
+                {bombs[rowIndex][colIndex] === 1 && (
+                  <BombAnimationDiv>
+                    <BombIcon icon={faBomb} />
+                  </BombAnimationDiv>
+                )}
               </CellButton>
             ))
-          ))}
+          )}
         </GameBoard>
         <BombControlsContainer>
           <div>
@@ -446,7 +560,11 @@ const App = () => {
               <option value={1}>Row 2</option>
               <option value={2}>Row 3</option>
             </select>
-            <BombIcon id="rowBombButton" icon={faBomb} onClick={() => placeBomb('row')} />
+            <BombIcon
+              id="rowBombButton"
+              icon={faBomb}
+              onClick={() => placeBomb("row")}
+            />
           </div>
           <div>
             <select
@@ -459,10 +577,16 @@ const App = () => {
               <option value={1}>Column 2</option>
               <option value={2}>Column 3</option>
             </select>
-            <BombIcon id="colBombButton" icon={faBomb} onClick={() => placeBomb('col')} />
+            <BombIcon
+              id="colBombButton"
+              icon={faBomb}
+              onClick={() => placeBomb("col")}
+            />
           </div>
         </BombControlsContainer>
-        <NewGameButton onClick={()=>newGame()}>New Game</NewGameButton>
+        <NewGameButton value="new game" onClick={() => newGame()}>
+          New Game
+        </NewGameButton>
       </BoardContainer>
     </AppContainer>
   );
