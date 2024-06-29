@@ -4,24 +4,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBomb } from "@fortawesome/free-solid-svg-icons";
 import { flash } from "react-animations";
 
-// Initialize the Tic-Tac-Toe board and bombs
-const initializeBoard = () => [
-  [-2, -2, 0, -2, -2],
-  [-2, 0, 0, 0, -2],
-  [-2, 0, 0, 0, -2],
-  [-2, 0, 0, 0, 0],
-  [0, -2, -2, -2, -2],
-];
-const initializeBombs = () => [
-  [-2, -2, 0, -2, -2],
-  [-2, 0, 0, 0, -2],
-  [-2, 0, 0, 0, -2],
-  [-2, 0, 0, 0, 0],
-  [0, -2, -2, -2, -2],
-];
-const initialPlayerBombs = { row: 1, col: 1 };
-const initialAiBombs = { row: 1, col: 1 };
-
 const AppContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -86,10 +68,6 @@ const CellButton = styled.button`
 
 const bombAnimation = keyframes`${flash}`;
 
-const BombAnimationDiv = styled.div`
-  animation: 1s ${bombAnimation};
-`;
-
 const NewGameButton = styled.button`
   font-size: 16px;
   padding: 10px 20px;
@@ -110,12 +88,16 @@ const NewGameButton = styled.button`
 `;
 
 const App = () => {
-  const [board, setBoard] = useState(initializeBoard());
-  const [bombs, setBombs] = useState(initializeBombs());
+  const initialPlayerBombs = { row: 1, col: 1 };
+  const initialAiBombs = { row: 1, col: 1 };
+
+  const [board, setBoard] = useState(null);
+  const [bombs, setBombs] = useState(null);
+  const [conditions, setConditions] = useState([]);
   const [playerBombs, setPlayerBombs] = useState(initialPlayerBombs);
   const [aiBombs, setAiBombs] = useState(initialAiBombs);
   const [turn, setTurn] = useState("Player");
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState("Player's Turn");
   const [selectedRow, setSelectedRow] = useState(0); // Default selected row
   const [selectedCol, setSelectedCol] = useState(0); // Default selected column
   const [winner, setWinner] = useState(null); // New state for winner
@@ -124,41 +106,128 @@ const App = () => {
     newGame();
   }, []);
 
-  const newGame = () => {
-    console.log("reset");
-    setBoard(initializeBoard());
-    setBombs(initializeBombs());
+  async function createBoard() {
+    const initialBoard = [
+      [-2, -2, -2, -2, -2],
+      [-2, 0, 0, 0, -2],
+      [-2, 0, 0, 0, -2],
+      [-2, 0, 0, 0, -2],
+      [-2, -2, -2, -2, -2]
+    ];
+    const uniqueCells = new Set();
+    while (uniqueCells.size < 3) {
+      const row = Math.floor(Math.random() * 5);
+      const col = Math.floor(Math.random() * 5);
+
+      // Ensure the cell is currently -2 and not already chosen
+      if (initialBoard[row][col] === -2) {
+        initialBoard[row][col] = 0; // Change -2 to 0
+        uniqueCells.add(`${row},${col}`);
+      }
+    }
+    setBoard(initialBoard);
+    setBombs(initialBoard);
+
+    return initialBoard;
+  }
+
+  // Function to compute new conditions based on the updated board
+  async function computeNewConditions(currBoard) {
+    const size = currBoard.length;
+    const newConditions = [];
+    // Check rows for conditions
+    for (let row = 0; row < size; row++) {
+      for (let i = 0; i <= size - 3; i++) {
+        // Check if the current cells and the next two cells are valid
+        if (
+          currBoard[row][i] === 0 &&          // Current cell
+          currBoard[row][i + 1] === 0 &&      // Next cell
+          currBoard[row][i + 2] === 0         // Next next cell
+        ) {
+          newConditions.push([[row, i], [row, i + 1], [row, i + 2]]);
+        }
+      }
+    }
+
+    // Check columns for conditions
+    for (let col = 0; col < size; col++) {
+      for (let i = 0; i <= size - 3; i++) {
+        // Check if the current cells and the next two cells are valid
+        if (
+          currBoard[i][col] === 0 &&          // Current cell
+          currBoard[i + 1][col] === 0 &&      // Next cell
+          currBoard[i + 2][col] === 0         // Next next cell
+        ) {
+          newConditions.push([[i, col], [i + 1, col], [i + 2, col]]);
+        }
+      }
+    }
+
+    // Check diagonals for conditions
+    for (let i = 0; i <= size - 3; i++) {
+      for (let j = 0; j <= size - 3; j++) {
+        // Check diagonal from top-left to bottom-right
+        if (
+          currBoard[i][j] === 0 &&              // Current cell
+          currBoard[i + 1][j + 1] === 0 &&      // Next cell
+          currBoard[i + 2][j + 2] === 0         // Next next cell
+        ) {
+          newConditions.push([[i, j], [i + 1, j + 1], [i + 2, j + 2]]);
+        }
+
+        // Check diagonal from top-right to bottom-left
+        if (
+          currBoard[i][j + 2] === 0 &&          // Current cell
+          currBoard[i + 1][j + 1] === 0 &&      // Next cell
+          currBoard[i + 2][j] === 0             // Next next cell
+        ) {
+          newConditions.push([[i, j + 2], [i + 1, j + 1], [i + 2, j]]);
+        }
+      }
+    }
+    setConditions(newConditions);
+  }
+
+  // Initialize the Tic-Tac-Toe board and bombs
+  async function newGame() {
+    const currBoard = await createBoard();
+    await computeNewConditions(currBoard);
     setPlayerBombs(initialPlayerBombs);
     setAiBombs(initialAiBombs);
     setTurn("Player");
     setMessage("Player's Turn");
     setWinner(null); // Reset winner state
-  };
+    setSelectedRow(0);
+    setSelectedCol(0);
+  }
 
   const updateBoard = (board, bombs, playerBombs, aiBombs) => {
     setBoard([...board]);
     setBombs([...bombs]);
     setPlayerBombs({ ...playerBombs });
     setAiBombs({ ...aiBombs });
-  };
+  }
 
   const handleCellClick = (row, col) => {
     if (turn === "Player" && board[row][col] === 0 && bombs[row][col] === 0) {
       setMove(board, row, col, 1);
       updateBoard(board, bombs, playerBombs, aiBombs);
-      if (!gameWon(board) && !boardFull(board)) {
+      if (!gameWon(board) && !boardFull()) {
         setTurn("AI");
         setMessage("AI's Turn");
         setTimeout(() => handleAIMove(), 500);
       } else {
-        checkGameResult(board);
+        checkGameResult();
       }
     }
-  };
+  }
 
   const handleAIMove = () => {
     const newBoard = [...board];
-    oComp(newBoard, bombs, aiBombs, playerBombs);
+    const newBombs = [...bombs];
+    const newAiBombs = { ...aiBombs };
+    const newPlayerBombs = { ...playerBombs };
+    oComp(newBoard, newBombs, newAiBombs, newPlayerBombs);
     setBoard(newBoard);
     if (!gameWon(newBoard) && !boardFull(newBoard)) {
       setTurn("Player");
@@ -166,7 +235,7 @@ const App = () => {
     } else {
       checkGameResult(newBoard);
     }
-  };
+  }
 
   const placeBomb = (type) => {
     if (type === "row" && playerBombs.row > 0) {
@@ -185,17 +254,17 @@ const App = () => {
     setTurn("AI");
     setMessage("AI's Turn");
     setTimeout(() => handleAIMove(), 500);
-  };
+  }
 
-  const gameWon = (board) => {
-    return winningPlayer(board, 1) || winningPlayer(board, -1);
-  };
+  const gameWon = (newBoard) => {
+    return winningPlayer(newBoard, 1) || winningPlayer(newBoard, -1);
+  }
 
-  const boardFull = (board) => {
+  const boardFull = () => {
     return board.flat().every((cell) => cell !== 0);
-  };
+  }
 
-  const checkGameResult = (board) => {
+  const checkGameResult = () => {
     if (winningPlayer(board, 1)) {
       setMessage("Player has won!");
       setWinner("Player"); // Set winner state
@@ -204,52 +273,34 @@ const App = () => {
       setMessage("AI has won!");
       setWinner("AI"); // Set winner state
       disableBoard();
-    } else if (boardFull(board)) {
+    } else if (boardFull()) {
       setMessage("The game is a draw.");
       setWinner("Draw"); // Set winner state
       disableBoard();
     }
-  };
+  }
 
   const disableBoard = () => {
     const cells = document.querySelectorAll('button:not([value="new game"])'); // Exclude New Game button
-    console.log(cells);
     cells.forEach((cell) => {
       cell.disabled = true;
     });
     document.getElementById("rowBombButton").classList.add("disabled");
     document.getElementById("colBombButton").classList.add("disabled");
-  };
+  }
 
-  const winningPlayer = (board, player) => {
-    const conditions = [
-      [board[0][2], board[1][2], board[2][2]], //top cell rule
-      [board[3][2], board[3][3], board[3][4]], //right cell rule
-      [board[1][2], board[2][3], board[3][4]], //right cell rule
-      [board[4][0], board[3][1], board[2][2]], //bottom left cell rule
-      [board[1][1], board[1][2], board[1][3]],
-      [board[2][1], board[2][2], board[2][3]],
-      [board[3][1], board[3][2], board[3][3]],
-      [board[1][1], board[2][1], board[3][1]],
-      [board[1][2], board[2][2], board[3][2]],
-      [board[1][3], board[2][3], board[3][3]],
-      [board[1][1], board[2][2], board[3][3]],
-      [board[1][3], board[2][2], board[3][1]],
-    ];
+  const winningPlayer = (newBoard, player) => {
     return conditions.some((condition) =>
-      condition.every((cell) => cell === player)
+      condition.every(([x, y]) => newBoard[x][y] === player)
     );
-  };
+  }
 
-  const setMove = (board, x, y, player) => {
-    const newBoard = [...board];
+  const setMove = (newBoard, x, y, player) => {
     newBoard[x][y] = player;
     setBoard(newBoard);
-  };
+  }
 
-  const detonateBomb = (board, bombs, index, bomb_type) => {
-    const newBoard = [...board];
-    const newBombs = [...bombs];
+  const detonateBomb = (newBoard, newBombs, index, bomb_type) => {
     if (bomb_type === "row") {
       for (let i = 0; i < 5; i++) {
         if (newBoard[index][i] === -2) {
@@ -263,19 +314,19 @@ const App = () => {
       }
     } else if (bomb_type === "col") {
       for (let i = 0; i < 5; i++) {
-        if (newBoard[index][i] === -2) {
-          newBoard[index][i] = -2;
-          newBombs[index][i] = -2;
+        if (newBoard[i][index] === -2) {
+          newBoard[i][index] = -2;
+          newBombs[i][index] = -2;
         } else {
-          newBoard[index][i] = 0;
-          newBombs[index][i] = 0;
+          newBoard[i][index] = 0;
+          newBombs[i][index] = 0;
         }
         addBombAnimation(i, index); // Add animation
       }
     }
     setBoard(newBoard);
     setBombs(newBombs);
-  };
+  }
 
   // Add animation to cell
   const addBombAnimation = (row, col) => {
@@ -286,97 +337,91 @@ const App = () => {
         cell.classList.remove("bomb-animation");
       }, 1000); // Duration of animation
     }
-  };
+  }
 
-  const evaluate = (board) => {
-    if (winningPlayer(board, 1)) {
+  const heuristic = (newBoard) => {
+    if (winningPlayer(newBoard, 1)) {
       return 1;
-    } else if (winningPlayer(board, -1)) {
+    } else if (winningPlayer(newBoard, -1)) {
       return -1;
     } else {
       return 0;
     }
-  };
-
-  const heuristic = (board) => {
-    return evaluate(board);
-  };
+  }
 
   const abminimax = (
-    board,
-    bombs,
+    newBoard,
+    newBombs,
     depth,
     alpha,
     beta,
     player,
-    playerBombs,
-    aiBombs
+    newPlayerBombs,
+    newAiBombs
   ) => {
     let row = -1;
     let col = -1;
     let bombMove = null;
-    if (depth === 0 || gameWon(board)) {
-      return [row, col, heuristic(board), bombMove];
+    if (depth === 0 || gameWon(newBoard)) {
+      return [row, col, heuristic(newBoard), bombMove];
     }
 
     let bestScore = player === 1 ? -Infinity : Infinity;
-    const moves = blanks(board);
+    const moves = blanks(newBoard);
 
     for (let cell of moves) {
-      setMove(board, cell[0], cell[1], player);
+      newBoard[cell[0]][cell[1]] = player;
       let score = abminimax(
-        board,
-        bombs,
+        newBoard,
+        newBombs,
         depth - 1,
         alpha,
         beta,
         -player,
-        playerBombs,
-        aiBombs
+        newPlayerBombs,
+        newAiBombs
       )[2];
-      setMove(board, cell[0], cell[1], 0);
+      newBoard[cell[0]][cell[1]] = 0;
       if (player === 1) {
         if (score > bestScore) {
           bestScore = score;
           row = cell[0];
           col = cell[1];
+          bombMove = null;
+          alpha = Math.max(alpha, bestScore);
+          if (alpha >= beta)
+            break;
         }
-        alpha = Math.max(alpha, score);
       } else {
         if (score < bestScore) {
           bestScore = score;
           row = cell[0];
           col = cell[1];
+          bombMove = null;
+          beta = Math.min(beta, bestScore);
+          if (alpha >= beta)
+            break;
         }
-        beta = Math.min(beta, score);
-      }
-      if (beta <= alpha) {
-        break;
       }
     }
-    // [-2, -2, 0, -2, -2],
-    // [-2, 1, 0, 0, -2],
-    // [-2, 0, 0, 0, -2],
-    // [-2, 0, 0, 0, 0],
-    // [0, -2, -2, -2, -2],
 
     // Consider using bombs
-    if (player === 1 && playerBombs.row > 0) {
+    if (player === 1 && newPlayerBombs.row > 0) {
       for (let i = 0; i < 5; i++) {
-        if (bombs[i].some((bomb, j) => bomb === 0 && board[i][j] !== 0)) {
-          const tempRow = [...board[i]];
-          detonateBomb(board, bombs, i, "row");
+        if (newBombs[i].some((bomb, j) => bomb === 0 && newBoard[i][j] !== 0)) {
+          const tempRow = [...newBoard[i]];
+          detonateBomb(newBoard, newBombs, i, "row");
           let score = abminimax(
-            board,
-            bombs,
+            newBoard,
+            newBombs,
             depth - 1,
             alpha,
             beta,
             -player,
-            playerBombs,
-            aiBombs
+            { row: newPlayerBombs.row - 1, col: newPlayerBombs.col },
+            newAiBombs
           );
-          board[i] = tempRow;
+          newBoard[i] = tempRow;
           if (score[2] > bestScore) {
             bestScore = score[2];
             bombMove = ["row", i];
@@ -387,22 +432,22 @@ const App = () => {
       }
     }
 
-    if (player === 1 && playerBombs.col > 0) {
-      for (let j = 0; j < 3; j++) {
-        if (bombs.some((row, i) => row[j] === 0 && board[i][j] !== 0)) {
-          const tempCol = board.map((row) => row[j]);
-          detonateBomb(board, bombs, j, "col");
+    if (player === 1 && newPlayerBombs.col > 0) {
+      for (let j = 0; j < 5; j++) {
+        if (newBombs.some((row, i) => row[j] === 0 && newBoard[i][j] !== 0)) {
+          const tempCol = newBoard.map((row) => row[j]);
+          detonateBomb(newBoard, newBombs, j, "col");
           let score = abminimax(
-            board,
-            bombs,
+            newBoard,
+            newBombs,
             depth - 1,
             alpha,
             beta,
             -player,
-            playerBombs,
-            aiBombs
+            { row: newPlayerBombs.row, col: newPlayerBombs.col - 1 },
+            newAiBombs
           );
-          for (let i = 0; i < 3; i++) board[i][j] = tempCol[i];
+          for (let i = 0; i < 5; i++) newBoard[i][j] = tempCol[i];
           if (score[2] > bestScore) {
             bestScore = score[2];
             bombMove = ["col", j];
@@ -413,22 +458,22 @@ const App = () => {
       }
     }
 
-    if (player === -1 && aiBombs.row > 0) {
-      for (let i = 0; i < 3; i++) {
-        if (bombs[i].some((bomb, j) => bomb === 0 && board[i][j] !== 0)) {
-          const tempRow = [...board[i]];
-          detonateBomb(board, bombs, i, "row");
+    if (player === -1 && newAiBombs.row > 0) {
+      for (let i = 0; i < 5; i++) {
+        if (newBombs[i].some((bomb, j) => bomb === 0 && newBoard[i][j] !== 0)) {
+          const tempRow = [...newBoard[i]];
+          detonateBomb(newBoard, newBombs, i, "row");
           let score = abminimax(
-            board,
-            bombs,
+            newBoard,
+            newBombs,
             depth - 1,
             alpha,
             beta,
             -player,
-            playerBombs,
-            aiBombs
+            newPlayerBombs,
+            { row: newAiBombs.row - 1, col: newAiBombs.col }
           );
-          board[i] = tempRow;
+          newBoard[i] = tempRow;
           if (score[2] < bestScore) {
             bestScore = score[2];
             bombMove = ["row", i];
@@ -439,22 +484,22 @@ const App = () => {
       }
     }
 
-    if (player === -1 && aiBombs.col > 0) {
-      for (let j = 0; j < 3; j++) {
-        if (bombs.some((row, i) => row[j] === 0 && board[i][j] !== 0)) {
-          const tempCol = board.map((row) => row[j]);
-          detonateBomb(board, bombs, j, "col");
+    if (player === -1 && newAiBombs.col > 0) {
+      for (let j = 0; j < 5; j++) {
+        if (newBombs.some((row, i) => row[j] === 0 && newBoard[i][j] !== 0)) {
+          const tempCol = newBoard.map((row) => row[j]);
+          detonateBomb(newBoard, newBombs, j, "col");
           let score = abminimax(
-            board,
-            bombs,
+            newBoard,
+            newBombs,
             depth - 1,
             alpha,
             beta,
             -player,
-            playerBombs,
-            aiBombs
+            newPlayerBombs,
+            { row: newAiBombs.row, col: newAiBombs.col - 1 }
           );
-          for (let i = 0; i < 3; i++) board[i][j] = tempCol[i];
+          for (let i = 0; i < 5; i++) newBoard[i][j] = tempCol[i];
           if (score[2] < bestScore) {
             bestScore = score[2];
             bombMove = ["col", j];
@@ -466,62 +511,62 @@ const App = () => {
     }
 
     return [row, col, bestScore, bombMove];
-  };
+  }
 
-  const oComp = (board, bombs, aiBombs, playerBombs) => {
-    const availableMoves = blanks(board);
+
+  const oComp = (newBoard, newBombs, newAiBombs, newPlayerBombs) => {
+    const availableMoves = blanks(newBoard);
     if (availableMoves.length >= 11) {
-      const [x, y] =
-        availableMoves[Math.floor(Math.random() * availableMoves.length)];
-      setMove(board, x, y, -1);
+      const [x, y] = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+      setMove(newBoard, x, y, -1);
     } else {
       const result = abminimax(
-        board,
-        bombs,
-        availableMoves.length,
+        newBoard,
+        newBombs,
+        newBoard.length,
         -Infinity,
         Infinity,
         -1,
-        playerBombs,
-        aiBombs
+        newPlayerBombs,
+        newAiBombs
       );
       if (result[3]) {
         const [bombType, index] = result[3];
         detonateBomb(board, bombs, index, bombType);
         aiBombs[bombType] -= 1;
       } else {
-      setMove(board, result[0], result[1], -1);
+        setMove(board, result[0], result[1], -1);
       }
     }
     setBoard([...board]);
     setBombs([...bombs]);
-  };
+  }
 
-  const blanks = (board) => {
+  const blanks = (newBoard) => {
     const moves = [];
-    for (let i = 0; i < board.length; i++) {
-      for (let j = 0; j < board[0].length; j++) {
-        if (board[i][j] === 0) {
+    for (let i = 0; i < newBoard.length; i++) {
+      for (let j = 0; j < newBoard[0].length; j++) {
+        if (newBoard[i][j] === 0) {
           moves.push([i, j]);
         }
       }
     }
     return moves;
-  };
+  }
 
   return (
     <AppContainer>
       <h1 style={{ color: "green" }}>Tic-Tac-Toe with Bombs</h1>
       <div style={{ color: "green" }}>{message}</div>
       <div style={{ color: "blue" }}>
-        Player Bombs: Row - {playerBombs.row}, Column - {playerBombs.col}
+        Player Bombs: Row - {playerBombs?.row}, Column - {playerBombs?.col}
       </div>
       <div style={{ color: "red" }}>
-        AI Bombs: Row - {aiBombs.row}, Column - {aiBombs.col}
+        AI Bombs: Row - {aiBombs?.row}, Column - {aiBombs?.col}
       </div>
       <BoardContainer>
         <GameBoard>
-          {board.map((row, rowIndex) =>
+          {board !== null && board.length === 5 && board.map((row, rowIndex) =>
             row.map((cell, colIndex) => (
               <CellButton
                 key={`${rowIndex}-${colIndex}`}
@@ -532,18 +577,14 @@ const App = () => {
                   cell === -2
                     ? "hidden"
                     : bombs[rowIndex][colIndex] === 1
-                    ? "bomb"
-                    : ""
+                      ? "bomb"
+                      : ""
                 }
                 disabled={winner !== null}
               >
                 {cell === 1 && "X"}
                 {cell === -1 && "O"}
-                {bombs[rowIndex][colIndex] === 1 && (
-                  <BombAnimationDiv>
-                    <BombIcon icon={faBomb} />
-                  </BombAnimationDiv>
-                )}
+                {bombs[rowIndex][colIndex] === 1}
               </CellButton>
             ))
           )}
@@ -559,11 +600,14 @@ const App = () => {
               <option value={0}>Row 1</option>
               <option value={1}>Row 2</option>
               <option value={2}>Row 3</option>
+              <option value={3}>Row 4</option>
+              <option value={4}>Row 5</option>
             </select>
             <BombIcon
               id="rowBombButton"
               icon={faBomb}
               onClick={() => placeBomb("row")}
+              className={playerBombs.row === 0 ? "disabled" : ""}
             />
           </div>
           <div>
@@ -576,11 +620,14 @@ const App = () => {
               <option value={0}>Column 1</option>
               <option value={1}>Column 2</option>
               <option value={2}>Column 3</option>
+              <option value={3}>Column 4</option>
+              <option value={4}>Column 5</option>
             </select>
             <BombIcon
               id="colBombButton"
               icon={faBomb}
               onClick={() => placeBomb("col")}
+              className={playerBombs.col === 0 ? "disabled" : ""}
             />
           </div>
         </BombControlsContainer>
