@@ -140,11 +140,15 @@ const App = () => {
       for (let i = 0; i <= size - 3; i++) {
         // Check if the current cells and the next two cells are valid
         if (
-          currBoard[row][i] === 0 &&          // Current cell
-          currBoard[row][i + 1] === 0 &&      // Next cell
-          currBoard[row][i + 2] === 0         // Next next cell
+          currBoard[row][i] === 0 && // Current cell
+          currBoard[row][i + 1] === 0 && // Next cell
+          currBoard[row][i + 2] === 0 // Next next cell
         ) {
-          newConditions.push([[row, i], [row, i + 1], [row, i + 2]]);
+          newConditions.push([
+            [row, i],
+            [row, i + 1],
+            [row, i + 2],
+          ]);
         }
       }
     }
@@ -154,11 +158,15 @@ const App = () => {
       for (let i = 0; i <= size - 3; i++) {
         // Check if the current cells and the next two cells are valid
         if (
-          currBoard[i][col] === 0 &&          // Current cell
-          currBoard[i + 1][col] === 0 &&      // Next cell
-          currBoard[i + 2][col] === 0         // Next next cell
+          currBoard[i][col] === 0 && // Current cell
+          currBoard[i + 1][col] === 0 && // Next cell
+          currBoard[i + 2][col] === 0 // Next next cell
         ) {
-          newConditions.push([[i, col], [i + 1, col], [i + 2, col]]);
+          newConditions.push([
+            [i, col],
+            [i + 1, col],
+            [i + 2, col],
+          ]);
         }
       }
     }
@@ -168,20 +176,28 @@ const App = () => {
       for (let j = 0; j <= size - 3; j++) {
         // Check diagonal from top-left to bottom-right
         if (
-          currBoard[i][j] === 0 &&              // Current cell
-          currBoard[i + 1][j + 1] === 0 &&      // Next cell
-          currBoard[i + 2][j + 2] === 0         // Next next cell
+          currBoard[i][j] === 0 && // Current cell
+          currBoard[i + 1][j + 1] === 0 && // Next cell
+          currBoard[i + 2][j + 2] === 0 // Next next cell
         ) {
-          newConditions.push([[i, j], [i + 1, j + 1], [i + 2, j + 2]]);
+          newConditions.push([
+            [i, j],
+            [i + 1, j + 1],
+            [i + 2, j + 2],
+          ]);
         }
 
         // Check diagonal from top-right to bottom-left
         if (
-          currBoard[i][j + 2] === 0 &&          // Current cell
-          currBoard[i + 1][j + 1] === 0 &&      // Next cell
-          currBoard[i + 2][j] === 0             // Next next cell
+          currBoard[i][j + 2] === 0 && // Current cell
+          currBoard[i + 1][j + 1] === 0 && // Next cell
+          currBoard[i + 2][j] === 0 // Next next cell
         ) {
-          newConditions.push([[i, j + 2], [i + 1, j + 1], [i + 2, j]]);
+          newConditions.push([
+            [i, j + 2],
+            [i + 1, j + 1],
+            [i + 2, j],
+          ]);
         }
       }
     }
@@ -206,7 +222,7 @@ const App = () => {
     setBombs([...bombs]);
     setPlayerBombs({ ...playerBombs });
     setAiBombs({ ...aiBombs });
-  }
+  };
 
   const handleCellClick = (row, col) => {
     if (turn === "Player" && board[row][col] === 0 && bombs[row][col] === 0) {
@@ -220,7 +236,7 @@ const App = () => {
         checkGameResult();
       }
     }
-  }
+  };
 
   const handleAIMove = () => {
     const newBoard = [...board];
@@ -235,7 +251,7 @@ const App = () => {
     } else {
       checkGameResult(newBoard);
     }
-  }
+  };
 
   const placeBomb = (type) => {
     if (type === "row" && playerBombs.row > 0) {
@@ -254,15 +270,15 @@ const App = () => {
     setTurn("AI");
     setMessage("AI's Turn");
     setTimeout(() => handleAIMove(), 500);
-  }
+  };
 
   const gameWon = (newBoard) => {
     return winningPlayer(newBoard, 1) || winningPlayer(newBoard, -1);
-  }
+  };
 
   const boardFull = () => {
     return board.flat().every((cell) => cell !== 0);
-  }
+  };
 
   const checkGameResult = () => {
     if (winningPlayer(board, 1)) {
@@ -278,7 +294,7 @@ const App = () => {
       setWinner("Draw"); // Set winner state
       disableBoard();
     }
-  }
+  };
 
   const disableBoard = () => {
     const cells = document.querySelectorAll('button:not([value="new game"])'); // Exclude New Game button
@@ -287,18 +303,18 @@ const App = () => {
     });
     document.getElementById("rowBombButton").classList.add("disabled");
     document.getElementById("colBombButton").classList.add("disabled");
-  }
+  };
 
   const winningPlayer = (newBoard, player) => {
     return conditions.some((condition) =>
       condition.every(([x, y]) => newBoard[x][y] === player)
     );
-  }
+  };
 
   const setMove = (newBoard, x, y, player) => {
     newBoard[x][y] = player;
     setBoard(newBoard);
-  }
+  };
 
   const detonateBomb = (newBoard, newBombs, index, bomb_type) => {
     if (bomb_type === "row") {
@@ -326,7 +342,7 @@ const App = () => {
     }
     setBoard(newBoard);
     setBombs(newBombs);
-  }
+  };
 
   // Add animation to cell
   const addBombAnimation = (row, col) => {
@@ -337,7 +353,7 @@ const App = () => {
         cell.classList.remove("bomb-animation");
       }, 1000); // Duration of animation
     }
-  }
+  };
 
   const heuristic = (newBoard) => {
     if (winningPlayer(newBoard, 1)) {
@@ -347,7 +363,7 @@ const App = () => {
     } else {
       return 0;
     }
-  }
+  };
 
   const abminimax = (
     newBoard,
@@ -389,8 +405,7 @@ const App = () => {
           col = cell[1];
           bombMove = null;
           alpha = Math.max(alpha, bestScore);
-          if (alpha >= beta)
-            break;
+          if (alpha >= beta) break;
         }
       } else {
         if (score < bestScore) {
@@ -399,8 +414,7 @@ const App = () => {
           col = cell[1];
           bombMove = null;
           beta = Math.min(beta, bestScore);
-          if (alpha >= beta)
-            break;
+          if (alpha >= beta) break;
         }
       }
     }
@@ -511,19 +525,19 @@ const App = () => {
     }
 
     return [row, col, bestScore, bombMove];
-  }
-
+  };
 
   const oComp = (newBoard, newBombs, newAiBombs, newPlayerBombs) => {
     const availableMoves = blanks(newBoard);
     if (availableMoves.length >= 11) {
-      const [x, y] = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+      const [x, y] =
+        availableMoves[Math.floor(Math.random() * availableMoves.length)];
       setMove(newBoard, x, y, -1);
     } else {
       const result = abminimax(
         newBoard,
         newBombs,
-        newBoard.length,
+        availableMoves.length,
         -Infinity,
         Infinity,
         -1,
@@ -540,7 +554,7 @@ const App = () => {
     }
     setBoard([...board]);
     setBombs([...bombs]);
-  }
+  };
 
   const blanks = (newBoard) => {
     const moves = [];
@@ -552,7 +566,7 @@ const App = () => {
       }
     }
     return moves;
-  }
+  };
 
   return (
     <AppContainer>
@@ -566,28 +580,32 @@ const App = () => {
       </div>
       <BoardContainer>
         <GameBoard>
-          {board !== null && board.length === 5 && board.map((row, rowIndex) =>
-            row.map((cell, colIndex) => (
-              <CellButton
-                key={`${rowIndex}-${colIndex}`}
-                onClick={() => handleCellClick(rowIndex, colIndex)}
-                value={cell}
-                id={`cell-${rowIndex}-${colIndex}`}
-                className={
-                  cell === -2
-                    ? "hidden"
-                    : bombs[rowIndex][colIndex] === 1
+          {board !== null &&
+            board.length === 5 &&
+            board.map((row, rowIndex) =>
+              row.map((cell, colIndex) => (
+                <CellButton
+                  key={`${rowIndex}-${colIndex}`}
+                  onClick={() => {
+                    handleCellClick(rowIndex, colIndex);
+                  }}
+                  value={cell}
+                  id={`cell-${rowIndex}-${colIndex}`}
+                  className={
+                    cell === -2
+                      ? "hidden"
+                      : bombs[rowIndex][colIndex] === 1
                       ? "bomb"
                       : ""
-                }
-                disabled={winner !== null}
-              >
-                {cell === 1 && "X"}
-                {cell === -1 && "O"}
-                {bombs[rowIndex][colIndex] === 1}
-              </CellButton>
-            ))
-          )}
+                  }
+                  disabled={winner !== null}
+                >
+                  {cell === 1 && "X"}
+                  {cell === -1 && "O"}
+                  {bombs[rowIndex][colIndex] === 1}
+                </CellButton>
+              ))
+            )}
         </GameBoard>
         <BombControlsContainer>
           <div>
