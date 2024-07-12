@@ -52,19 +52,23 @@ const CellButton = styled.button`
   justify-content: center;
   color: ${({ value }) =>
     value === 1 ? "blue" : value === -1 ? "red" : "black"};
-  background-color: #f0f0f0; /* Default background color */
+  background-color: ${({ rowIndex, colIndex, selectedRow, selectedCol }) =>
+    rowIndex === selectedRow ? "#ff3bad" : colIndex === selectedCol ? "#3bff6c": "#f0f0f0"};
   border: 1px solid #ccc;
   transition: background-color 0.3s ease;
   visibility: ${({ value }) => (value === -2 ? "hidden" : "visible")};
   &:hover {
-    background-color: #e0e0e0; /* Lighter background on hover */
+    background-color: ${({ rowIndex, colIndex, selectedRow, selectedCol }) =>
+    rowIndex === selectedRow || colIndex === selectedCol ? "#ff3bad" : "#e0e0e0"};
   }
 
   &:disabled {
-    background-color: #d0d0d0; /* Disabled background color */
+    background-color: #d0d0d0;
     cursor: not-allowed;
   }
 `;
+
+
 
 const bombAnimation = keyframes`${flash}`;
 
@@ -819,6 +823,10 @@ const App = () => {
                     handleCellClick(rowIndex, colIndex);
                   }}
                   value={cell}
+                  rowIndex={rowIndex}
+                  colIndex={colIndex}
+                  selectedRow={selectedRow}
+                  selectedCol={selectedCol}
                   id={`cell-${rowIndex}-${colIndex}`}
                   className={
                     cell === -2
