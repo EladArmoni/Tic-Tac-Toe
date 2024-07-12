@@ -28,7 +28,7 @@ const BombIcon = styled(FontAwesomeIcon)`
   margin: 0 10px;
   font-size: 24px;
   &:hover {
-    color: red;
+    color: ${({ type }) => (type === "row" ? "#ff3bad7f" : "#3bffd57b")};
   }
 
   &.disabled {
@@ -53,13 +53,13 @@ const CellButton = styled.button`
   color: ${({ value }) =>
     value === 1 ? "blue" : value === -1 ? "red" : "black"};
   background-color: ${({ rowIndex, colIndex, selectedRow, selectedCol }) =>
-    rowIndex === selectedRow ? "#ff3bad" : colIndex === selectedCol ? "#3bff6c": "#f0f0f0"};
+    rowIndex === selectedRow ? "#ff3bad3d" : colIndex === selectedCol ? "#3bffd542": "#f0f0f0"};
   border: 1px solid #ccc;
   transition: background-color 0.3s ease;
   visibility: ${({ value }) => (value === -2 ? "hidden" : "visible")};
   &:hover {
     background-color: ${({ rowIndex, colIndex, selectedRow, selectedCol }) =>
-    rowIndex === selectedRow || colIndex === selectedCol ? "#ff3bad" : "#e0e0e0"};
+    rowIndex === selectedRow || colIndex === selectedCol ? "#e0e0e0" : "#e0e0e0"};
   }
 
   &:disabled {
@@ -861,6 +861,7 @@ const App = () => {
               icon={faBomb}
               onClick={() => placeBomb("row")}
               className={playerBombs.row === 0 ? "disabled" : ""}
+              type="row"
             />
           </div>
           <div>
@@ -879,6 +880,7 @@ const App = () => {
               icon={faBomb}
               onClick={() => placeBomb("col")}
               className={playerBombs.col === 0 ? "disabled" : ""}
+              type="col"
             />
           </div>
         </BombControlsContainer>
