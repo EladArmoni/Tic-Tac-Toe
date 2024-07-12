@@ -98,9 +98,11 @@ const App = () => {
   const [aiBombs, setAiBombs] = useState(initialAiBombs);
   const [turn, setTurn] = useState("Player");
   const [message, setMessage] = useState("Player's Turn");
-  const [selectedRow, setSelectedRow] = useState(0); // Default selected row
-  const [selectedCol, setSelectedCol] = useState(0); // Default selected column
+  const [selectedRow, setSelectedRow] = useState(null); // Default selected row
+  const [selectedCol, setSelectedCol] = useState(null); // Default selected column
   const [winner, setWinner] = useState(null); // New state for winner
+  const [rowsSet, setRowsSet] = useState([]);
+  const [colsSet, setColsSet] = useState([]);
 
   useEffect(() => {
     newGame();
@@ -125,6 +127,28 @@ const App = () => {
         uniqueCells.add(`${row},${col}`);
       }
     }
+
+    // Filter out rows that contain only -2 values
+    let rows = []
+    initialBoard.filter((row, index) => { if (row.some(cell => cell !== -2)) rows.push(index) });
+    setRowsSet(rows);
+    if (!rows.includes(0))
+      setSelectedRow(1)
+    else
+      setSelectedRow(0)
+
+    // Transpose the filtered board to filter columns
+    const transpose = (matrix) => matrix[0].map((col, i) => matrix.map(row => row[i]));
+    const transposedBoard = transpose(initialBoard);
+    // Filter out columns that contain only -2 values
+    let cols = []
+    transposedBoard.filter((col, index) => { if (col.some(cell => cell !== -2)) cols.push(index) });
+    setColsSet(cols);
+    if (!cols.includes(0))
+      setSelectedCol(1)
+    else
+      setSelectedCol(0)
+
     setBoard(initialBoard);
     setBombs(initialBoard);
 
@@ -206,6 +230,8 @@ const App = () => {
 
   // Initialize the Tic-Tac-Toe board and bombs
   async function newGame() {
+    setSelectedRow(null);
+    setSelectedCol(null);
     const currBoard = await createBoard();
     await computeNewConditions(currBoard);
     setPlayerBombs(initialPlayerBombs);
@@ -213,8 +239,6 @@ const App = () => {
     setTurn("Player");
     setMessage("Player's Turn");
     setWinner(null); // Reset winner state
-    setSelectedRow(0);
-    setSelectedCol(0);
     enableBoard();
   }
 
@@ -800,8 +824,8 @@ const App = () => {
                     cell === -2
                       ? "hidden"
                       : bombs[rowIndex][colIndex] === 1
-                      ? "bomb"
-                      : ""
+                        ? "bomb"
+                        : ""
                   }
                   disabled={winner !== null}
                 >
@@ -820,11 +844,9 @@ const App = () => {
               onChange={(e) => setSelectedRow(parseInt(e.target.value))}
               disabled={winner !== null}
             >
-              <option value={0}>Row 1</option>
-              <option value={1}>Row 2</option>
-              <option value={2}>Row 3</option>
-              <option value={3}>Row 4</option>
-              <option value={4}>Row 5</option>
+              {rowsSet.map((index) => (<option key={index} value={index}>
+                Row {index + rowsSet.includes(0)}
+              </option>))}
             </select>
             <BombIcon
               id="rowBombButton"
@@ -840,11 +862,9 @@ const App = () => {
               onChange={(e) => setSelectedCol(parseInt(e.target.value))}
               disabled={winner !== null}
             >
-              <option value={0}>Column 1</option>
-              <option value={1}>Column 2</option>
-              <option value={2}>Column 3</option>
-              <option value={3}>Column 4</option>
-              <option value={4}>Column 5</option>
+              {colsSet.map((index) => (<option key={index} value={index}>
+                Column {index + colsSet.includes(0)}
+              </option>))}
             </select>
             <BombIcon
               id="colBombButton"
