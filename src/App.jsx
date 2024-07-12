@@ -215,6 +215,7 @@ const App = () => {
     setWinner(null); // Reset winner state
     setSelectedRow(0);
     setSelectedCol(0);
+    enableBoard();
   }
 
   const updateBoard = (board, bombs, playerBombs, aiBombs) => {
@@ -239,12 +240,26 @@ const App = () => {
   };
   const handleAIMove = () => {
     const newBoard = [...board];
-    const result = abminimax(newBoard, 3, -Infinity, Infinity, -1);
+    const newBombs = [...bombs];
+    const newAiBombs = { ...aiBombs };
+    const newPlayerBombs = { ...playerBombs };
+    const result = abminimax(
+      newBoard,
+      newBombs,
+      3,
+      -Infinity,
+      Infinity,
+      -1,
+      newPlayerBombs,
+      newAiBombs
+    );
     if (result[0] !== -1 && result[1] !== -1) {
       if (result[3]) {
         const [bombType, index] = result[3];
-        detonateBomb(board, bombs, index, bombType);
-        aiBombs[bombType] -= 1;
+        detonateBomb(newBoard, newBombs, index, bombType);
+        bombType === "col"
+          ? setAiBombs({ ...aiBombs, col: aiBombs["col"] - 1 })
+          : setAiBombs({ ...aiBombs, row: aiBombs["row"] - 1 });
       } else {
         setMove(newBoard, result[0], result[1], -1);
       }
@@ -323,6 +338,14 @@ const App = () => {
     document.getElementById("rowBombButton").classList.add("disabled");
     document.getElementById("colBombButton").classList.add("disabled");
   };
+  const enableBoard = () => {
+    const cells = document.querySelectorAll('button:not([value="new game"])'); // Exclude New Game button
+    cells.forEach((cell) => {
+      cell.disabled = false;
+    });
+    document.getElementById("rowBombButton").classList.remove("disabled");
+    document.getElementById("colBombButton").classList.remove("disabled");
+  };
 
   const winningPlayer = (newBoard, player) => {
     return conditions.some((condition) =>
@@ -383,15 +406,34 @@ const App = () => {
       return 0;
     }
   };
-  const abminimax = (newBoard, depth, alpha, beta, player) => {
+  const abminimax = (
+    newBoard,
+    newBombs,
+    depth,
+    alpha,
+    beta,
+    player,
+    newPlayerBombs,
+    newAiBombs
+  ) => {
     let row = -1;
     let col = -1;
+    let bombMove = null;
     if (depth === 0 || gameWon(newBoard)) {
       return [row, col, heuristic(newBoard)];
     } else {
       for (let cell of blanks(newBoard)) {
         setMove(newBoard, cell[0], cell[1], player);
-        let score = abminimax(newBoard, depth - 1, alpha, beta, -player)[2];
+        let score = abminimax(
+          newBoard,
+          newBombs,
+          depth - 1,
+          alpha,
+          beta,
+          -player,
+          newPlayerBombs,
+          newAiBombs
+        )[2];
         newBoard[cell[0]][cell[1]] = 0;
         if (player === 1) {
           if (score > alpha) {
@@ -408,7 +450,113 @@ const App = () => {
         }
         if (alpha >= beta) break;
       }
-      return player === 1 ? [row, col, alpha] : [row, col, beta];
+      // Consider using bombs
+      if (player === 1 && newPlayerBombs.row > 0) {
+        for (let i = 0; i < 5; i++) {
+          if (
+            newBombs[i].some((bomb, j) => bomb === 0 && newBoard[i][j] !== 0)
+          ) {
+            const tempRow = [...newBoard[i]];
+            detonateBomb(newBoard, newBombs, i, "row");
+            let score = abminimax(
+              newBoard,
+              newBombs,
+              depth - 1,
+              alpha,
+              beta,
+              -player,
+              { row: newPlayerBombs.row - 1, col: newPlayerBombs.col },
+              newAiBombs
+            )[2];
+            newBoard[i] = tempRow;
+            if (score > alpha) {
+              alpha = score;
+              bombMove = ["row", i];
+              if (alpha >= beta) break;
+            }
+          }
+        }
+      }
+
+      if (player === 1 && newPlayerBombs.col > 0) {
+        for (let j = 0; j < 5; j++) {
+          if (newBombs.some((row, i) => row[j] === 0 && newBoard[i][j] !== 0)) {
+            const tempCol = newBoard.map((row) => row[j]);
+            detonateBomb(newBoard, newBombs, j, "col");
+            let score = abminimax(
+              newBoard,
+              newBombs,
+              depth - 1,
+              alpha,
+              beta,
+              -player,
+              { row: newPlayerBombs.row, col: newPlayerBombs.col - 1 },
+              newAiBombs
+            )[2];
+            for (let i = 0; i < 5; i++) newBoard[i][j] = tempCol[i];
+            if (score > alpha) {
+              alpha = score;
+              bombMove = ["col", j];
+              if (alpha >= beta) break;
+            }
+          }
+        }
+      }
+
+      if (player === -1 && newAiBombs.row > 0) {
+        for (let i = 0; i < 5; i++) {
+          if (
+            newBombs[i].some((bomb, j) => bomb !== -2 && newBoard[i][j] !== 0)
+          ) {
+            const tempRow = [...newBoard[i]];
+            detonateBomb(newBoard, newBombs, i, "row");
+            let score = abminimax(
+              newBoard,
+              newBombs,
+              depth - 1,
+              alpha,
+              beta,
+              -player,
+              newPlayerBombs,
+              { row: newAiBombs.row - 1, col: newAiBombs.col }
+            )[2];
+            newBoard[i] = tempRow;
+            if (score < beta) {
+              beta = score;
+              bombMove = ["row", i];
+              if (alpha >= beta) break;
+            }
+          }
+        }
+      }
+
+      if (player === -1 && newAiBombs.col > 0) {
+        for (let j = 0; j < 5; j++) {
+          if (
+            newBombs.some((row, i) => row[j] !== -2 && newBoard[i][j] !== 0)
+          ) {
+            const tempCol = newBoard.map((row) => row[j]);
+            detonateBomb(newBoard, newBombs, j, "col");
+            let score = abminimax(
+              newBoard,
+              newBombs,
+              depth - 1,
+              alpha,
+              beta,
+              -player,
+              newPlayerBombs,
+              { row: newAiBombs.row, col: newAiBombs.col - 1 }
+            )[2];
+            for (let i = 0; i < 5; i++) newBoard[i][j] = tempCol[i];
+            if (score < beta) {
+              beta = score;
+              bombMove = ["col", j];
+              if (alpha >= beta) break;
+            }
+          }
+        }
+      }
+      return player === 1 ? [row, col, alpha] : [row, col, beta, bombMove];
     }
   };
 
@@ -572,34 +720,35 @@ const App = () => {
   //   }
   // };
 
-  const oComp = (newBoard, newBombs, newAiBombs, newPlayerBombs) => {
-    const availableMoves = blanks(newBoard);
-    if (availableMoves.length >= 11) {
-      const [x, y] =
-        availableMoves[Math.floor(Math.random() * availableMoves.length)];
-      setMove(newBoard, x, y, -1);
-    } else {
-      const result = abminimax(
-        newBoard,
-        newBombs,
-        availableMoves.length,
-        -Infinity,
-        Infinity,
-        -1,
-        newPlayerBombs,
-        newAiBombs
-      );
-      if (result[3]) {
-        const [bombType, index] = result[3];
-        detonateBomb(board, bombs, index, bombType);
-        aiBombs[bombType] -= 1;
-      } else {
-        setMove(board, result[0], result[1], -1);
-      }
-    }
-    setBoard([...board]);
-    setBombs([...bombs]);
-  };
+  // const oComp = (newBoard, newBombs, newAiBombs, newPlayerBombs) => {
+  //   const availableMoves = blanks(newBoard);
+  //   if (availableMoves.length >= 11) {
+  //     const [x, y] =
+  //       availableMoves[Math.floor(Math.random() * availableMoves.length)];
+  //     setMove(newBoard, x, y, -1);
+  //   } else {
+  //     const result = abminimax(
+  //       newBoard,
+  //       newBombs,
+  //       availableMoves.length,
+  //       -Infinity,
+  //       Infinity,
+  //       -1,
+  //       newPlayerBombs,
+  //       newAiBombs
+  //     );
+  //     if (result[3]) {
+  //       alert("bomb", result[3]);
+  //       const [bombType, index] = result[3];
+  //       detonateBomb(board, bombs, index, bombType);
+  //       aiBombs[bombType] -= 1;
+  //     } else {
+  //       setMove(board, result[0], result[1], -1);
+  //     }
+  //   }
+  //   setBoard([...board]);
+  //   setBombs([...bombs]);
+  // };
   const blanks = (newBoard) => {
     const moves = [];
     for (let i = 0; i < newBoard.length; i++) {
