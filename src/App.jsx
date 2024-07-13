@@ -54,6 +54,12 @@ const CellButton = styled.button`
     value === 1 ? "blue" : value === -1 ? "red" : "black"};
   background-color: ${({ rowIndex, colIndex, selectedRow, selectedCol }) =>
     rowIndex === selectedRow ? "#ff3bad3d" : colIndex === selectedCol ? "#3bffd542": "#f0f0f0"};
+  background: ${({ rowIndex, colIndex, selectedRow, selectedCol }) =>
+    rowIndex === selectedRow
+      ? "#ff3bad3d url('/bomb.png') no-repeat center/contain"
+      : colIndex === selectedCol
+      ? "#3bffd542 url('/bomb.png') no-repeat center/contain"
+      : "#f0f0f0"};
   border: 1px solid #ccc;
   transition: background-color 0.3s ease;
   visibility: ${({ value }) => (value === -2 ? "hidden" : "visible")};
@@ -852,7 +858,9 @@ const App = () => {
               onChange={(e) => setSelectedRow(parseInt(e.target.value))}
               disabled={winner !== null}
             >
-              {rowsSet.map((index) => (<option key={index} value={index}>
+            <option disabled> Choose Row</option>
+              {rowsSet.map((index) => (
+              <option key={index} value={index}>
                 Row {index + rowsSet.includes(0)}
               </option>))}
             </select>
@@ -871,6 +879,8 @@ const App = () => {
               onChange={(e) => setSelectedCol(parseInt(e.target.value))}
               disabled={winner !== null}
             >
+                          <option disabled> Choose Column</option>
+
               {colsSet.map((index) => (<option key={index} value={index}>
                 Column {index + colsSet.includes(0)}
               </option>))}
