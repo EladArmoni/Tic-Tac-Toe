@@ -117,7 +117,9 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    checkGameResult();
+    if (board != null) {
+      checkGameResult();
+    }
   }, [board]);
 
   async function createBoard() {
