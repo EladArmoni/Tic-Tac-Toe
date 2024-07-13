@@ -118,6 +118,12 @@ const App = () => {
     newGame();
   }, []);
 
+  useEffect(() => {
+    if (board != null) {
+      checkGameResult();
+    }
+  }, [board]);
+
   async function createBoard() {
     const initialBoard = [
       [-2, -2, -2, -2, -2],
