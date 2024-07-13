@@ -30,6 +30,7 @@ const BombIcon = styled(FontAwesomeIcon)`
   &:hover {
     color: ${({ type }) => (type === "row" ? "#ff3bad7f" : "#3bffd57b")};
   }
+  
 
   &.disabled {
     pointer-events: none;
@@ -53,10 +54,12 @@ const CellButton = styled.button`
   color: ${({ value }) =>
     value === 1 ? "blue" : value === -1 ? "red" : "black"};
   background-color: ${({ rowIndex, colIndex, selectedRow, selectedCol }) =>
+    rowIndex === selectedRow ? "#f0f0f0" : colIndex === selectedCol ? "#f0f0f0": "#f0f0f0"};
+  background: ${({ rowIndex, colIndex, selectedRow, selectedCol }) =>
     rowIndex === selectedRow
-      ? "#ff3bad3d"
+      ? "#f0f0f0 url('/bomb.png') no-repeat center/contain"
       : colIndex === selectedCol
-      ? "#3bffd542"
+      ? "#f0f0f0 url('/bomb.png') no-repeat center/contain"
       : "#f0f0f0"};
   border: 1px solid #ccc;
   transition: background-color 0.3s ease;
@@ -106,8 +109,8 @@ const App = () => {
   const [aiBombs, setAiBombs] = useState(initialAiBombs);
   const [turn, setTurn] = useState("Player");
   const [message, setMessage] = useState("Player's Turn");
-  const [selectedRow, setSelectedRow] = useState(null); // Default selected row
-  const [selectedCol, setSelectedCol] = useState(null); // Default selected column
+  const [selectedRow, setSelectedRow] = useState(-1); // Default selected row
+  const [selectedCol, setSelectedCol] = useState(-1); // Default selected column
   const [winner, setWinner] = useState(null); // New state for winner
   const [rowsSet, setRowsSet] = useState([]);
   const [colsSet, setColsSet] = useState([]);
@@ -148,8 +151,10 @@ const App = () => {
       if (row.some((cell) => cell !== -2)) rows.push(index);
     });
     setRowsSet(rows);
-    if (!rows.includes(0)) setSelectedRow(1);
-    else setSelectedRow(0);
+    // if (!rows.includes(0))
+    //   setSelectedRow(1)
+    // else
+    //   setSelectedRow(0)
 
     // Transpose the filtered board to filter columns
     const transpose = (matrix) =>
@@ -161,8 +166,10 @@ const App = () => {
       if (col.some((cell) => cell !== -2)) cols.push(index);
     });
     setColsSet(cols);
-    if (!cols.includes(0)) setSelectedCol(1);
-    else setSelectedCol(0);
+    // if (!cols.includes(0))
+    //   setSelectedCol(1)
+    // else
+    //   setSelectedCol(0)
 
     setBoard(initialBoard);
     setBombs(initialBoard);
@@ -245,8 +252,9 @@ const App = () => {
 
   // Initialize the Tic-Tac-Toe board and bombs
   async function newGame() {
-    setSelectedRow(null);
-    setSelectedCol(null);
+
+    setSelectedRow(-1);
+    setSelectedCol(-1);
     const currBoard = await createBoard();
     await computeNewConditions(currBoard);
     setPlayerBombs(initialPlayerBombs);
@@ -326,6 +334,38 @@ const App = () => {
   //   }
   // };
 
+  const rowbombbutton = document.getElementById("rowBombButton")
+  const colbombbutton = document.getElementById("colBombButton")
+
+  useEffect(function(){
+    console.log(selectedRow)
+    console.log(selectedCol)
+    console.log(rowbombbutton)
+    console.log(colbombbutton)
+    if(rowbombbutton && colbombbutton){
+
+      console.log(document.getElementById("rowBombButton").classList);
+        if(selectedRow === -1){
+          document.getElementById("rowBombButton").classList.add("disabled");
+        }
+        else if (selectedRow !== -1 && playerBombs.row > 0){
+          document.getElementById("rowBombButton").classList.remove("disabled");
+  
+        }
+        if(selectedCol === -1){
+          document.getElementById("colBombButton").classList.add("disabled");
+        }
+        else if (selectedCol !== -1 && playerBombs.col > 0){
+          document.getElementById("colBombButton").classList.remove("disabled");
+  
+        }
+
+
+    }
+      console.log(document.getElementById("rowBombButton").classList);
+
+  },[selectedCol,selectedRow,rowbombbutton,colbombbutton, playerBombs])
+
   const placeBomb = (type) => {
     if (type === "row" && playerBombs.row > 0) {
       detonateBomb(board, bombs, selectedRow, "row");
@@ -382,8 +422,9 @@ const App = () => {
     cells.forEach((cell) => {
       cell.disabled = false;
     });
-    document.getElementById("rowBombButton").classList.remove("disabled");
-    document.getElementById("colBombButton").classList.remove("disabled");
+    // document.getElementById("rowBombButton").classList.remove("disabled");
+    // document.getElementById("colBombButton").classList.remove("disabled");
+
   };
 
   const winningPlayer = (newBoard, player) => {
@@ -423,6 +464,8 @@ const App = () => {
     }
     setBoard(newBoard);
     setBombs(newBombs);
+    setSelectedCol(-1)
+    setSelectedRow(-1)
   };
 
   // Add animation to cell
@@ -863,6 +906,7 @@ const App = () => {
               onChange={(e) => setSelectedRow(parseInt(e.target.value))}
               disabled={winner !== null}
             >
+            <option value={-1}  > Choose Row</option>
               {rowsSet.map((index) => (
                 <option key={index} value={index}>
                   Row {index + rowsSet.includes(0)}
@@ -873,7 +917,7 @@ const App = () => {
               id="rowBombButton"
               icon={faBomb}
               onClick={() => placeBomb("row")}
-              className={playerBombs.row === 0 ? "disabled" : ""}
+              // className={playerBombs.row === 0? "disabled" : ""}
               type="row"
             />
           </div>
@@ -884,17 +928,17 @@ const App = () => {
               onChange={(e) => setSelectedCol(parseInt(e.target.value))}
               disabled={winner !== null}
             >
-              {colsSet.map((index) => (
-                <option key={index} value={index}>
-                  Column {index + colsSet.includes(0)}
-                </option>
-              ))}
+                          <option value={-1} > Choose Column</option>
+
+              {colsSet.map((index) => (<option key={index} value={index}>
+                Column {index + colsSet.includes(0)}
+              </option>))}
             </select>
             <BombIcon
               id="colBombButton"
               icon={faBomb}
               onClick={() => placeBomb("col")}
-              className={playerBombs.col === 0 ? "disabled" : ""}
+              // className={playerBombs.col === 0 ? "disabled" : ""}
               type="col"
             />
           </div>
