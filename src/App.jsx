@@ -53,13 +53,19 @@ const CellButton = styled.button`
   color: ${({ value }) =>
     value === 1 ? "blue" : value === -1 ? "red" : "black"};
   background-color: ${({ rowIndex, colIndex, selectedRow, selectedCol }) =>
-    rowIndex === selectedRow ? "#ff3bad3d" : colIndex === selectedCol ? "#3bffd542": "#f0f0f0"};
+    rowIndex === selectedRow
+      ? "#ff3bad3d"
+      : colIndex === selectedCol
+      ? "#3bffd542"
+      : "#f0f0f0"};
   border: 1px solid #ccc;
   transition: background-color 0.3s ease;
   visibility: ${({ value }) => (value === -2 ? "hidden" : "visible")};
   &:hover {
     background-color: ${({ rowIndex, colIndex, selectedRow, selectedCol }) =>
-    rowIndex === selectedRow || colIndex === selectedCol ? "#e0e0e0" : "#e0e0e0"};
+      rowIndex === selectedRow || colIndex === selectedCol
+        ? "#e0e0e0"
+        : "#e0e0e0"};
   }
 
   &:disabled {
@@ -67,8 +73,6 @@ const CellButton = styled.button`
     cursor: not-allowed;
   }
 `;
-
-
 
 const bombAnimation = keyframes`${flash}`;
 
@@ -112,6 +116,10 @@ const App = () => {
     newGame();
   }, []);
 
+  useEffect(() => {
+    checkGameResult();
+  }, [board]);
+
   async function createBoard() {
     const initialBoard = [
       [-2, -2, -2, -2, -2],
@@ -133,25 +141,26 @@ const App = () => {
     }
 
     // Filter out rows that contain only -2 values
-    let rows = []
-    initialBoard.filter((row, index) => { if (row.some(cell => cell !== -2)) rows.push(index) });
+    let rows = [];
+    initialBoard.filter((row, index) => {
+      if (row.some((cell) => cell !== -2)) rows.push(index);
+    });
     setRowsSet(rows);
-    if (!rows.includes(0))
-      setSelectedRow(1)
-    else
-      setSelectedRow(0)
+    if (!rows.includes(0)) setSelectedRow(1);
+    else setSelectedRow(0);
 
     // Transpose the filtered board to filter columns
-    const transpose = (matrix) => matrix[0].map((col, i) => matrix.map(row => row[i]));
+    const transpose = (matrix) =>
+      matrix[0].map((col, i) => matrix.map((row) => row[i]));
     const transposedBoard = transpose(initialBoard);
     // Filter out columns that contain only -2 values
-    let cols = []
-    transposedBoard.filter((col, index) => { if (col.some(cell => cell !== -2)) cols.push(index) });
+    let cols = [];
+    transposedBoard.filter((col, index) => {
+      if (col.some((cell) => cell !== -2)) cols.push(index);
+    });
     setColsSet(cols);
-    if (!cols.includes(0))
-      setSelectedCol(1)
-    else
-      setSelectedCol(0)
+    if (!cols.includes(0)) setSelectedCol(1);
+    else setSelectedCol(0);
 
     setBoard(initialBoard);
     setBombs(initialBoard);
@@ -832,8 +841,8 @@ const App = () => {
                     cell === -2
                       ? "hidden"
                       : bombs[rowIndex][colIndex] === 1
-                        ? "bomb"
-                        : ""
+                      ? "bomb"
+                      : ""
                   }
                   disabled={winner !== null}
                 >
@@ -852,9 +861,11 @@ const App = () => {
               onChange={(e) => setSelectedRow(parseInt(e.target.value))}
               disabled={winner !== null}
             >
-              {rowsSet.map((index) => (<option key={index} value={index}>
-                Row {index + rowsSet.includes(0)}
-              </option>))}
+              {rowsSet.map((index) => (
+                <option key={index} value={index}>
+                  Row {index + rowsSet.includes(0)}
+                </option>
+              ))}
             </select>
             <BombIcon
               id="rowBombButton"
@@ -871,9 +882,11 @@ const App = () => {
               onChange={(e) => setSelectedCol(parseInt(e.target.value))}
               disabled={winner !== null}
             >
-              {colsSet.map((index) => (<option key={index} value={index}>
-                Column {index + colsSet.includes(0)}
-              </option>))}
+              {colsSet.map((index) => (
+                <option key={index} value={index}>
+                  Column {index + colsSet.includes(0)}
+                </option>
+              ))}
             </select>
             <BombIcon
               id="colBombButton"
