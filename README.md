@@ -5,7 +5,7 @@ This is a unique and fun twist on the classic Tic-Tac-Toe game, implemented in R
 ### Features
 
 - **Classic Tic-Tac-Toe Gameplay:** Play the traditional 3x3 game on a 5x5 grid with added complexity.
-- **Bombs:** Each player (both human and AI) gets bombs that can clear entire rows or columns.
+- **Bombs:** Each player (both human and AI) gets bombs (1 for row and 1 for col) that can clear entire rows or columns.
 - **AI Opponent:** The AI uses the Minimax algorithm with alpha-beta pruning to make strategic moves.
 - **Random Cell Initialization:** At the start of the game, three cells are randomly selected and blocked.
 - **Responsive Design:** The game is designed to be responsive and interactive.
