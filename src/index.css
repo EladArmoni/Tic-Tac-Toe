@@ -11,3 +11,65 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+.player-box {
+  position: absolute;
+  width: 250px;
+  height: 400px;
+  border-radius: 15px;
+  background-color: #2f0164;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 50px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 28px;
+}
+
+.player-icon {
+  width: 150px;
+  height: 150px;
+  position: absolute;
+  left: 45%;
+  top:0px;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+}
+
+.icon-img {
+  width: inherit ;
+}
+
+.rocket {
+  width: 80px;
+  margin: 10px;
+}
+
+.row-col {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+
+}
+
+.turn {
+  font-size: 40px;
+  color: #fff;
+  font-weight: 600;
+  font-family: "Calibri";
+  margin-bottom: 50px;
+  margin-top: 65px;
+}
+
+.hacker {
+  position: absolute;
+  left: 70%;
+  bottom: 80%;
+  width: 150px;
+}

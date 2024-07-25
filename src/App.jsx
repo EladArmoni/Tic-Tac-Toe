@@ -3,6 +3,7 @@ import styled, { keyframes } from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBomb } from "@fortawesome/free-solid-svg-icons";
 import { flash } from "react-animations";
+import Player from "./Player";
 
 // Styled components for the application
 const AppContainer = styled.div`
@@ -11,6 +12,11 @@ const AppContainer = styled.div`
   align-items: center;
   justify-content: center;
   height: 100vh;
+  background-color:#4d04a5;
+  background: url("/bg3.jpeg");
+      background-size:     cover;                      /* <------ */
+    background-repeat:   no-repeat;
+    background-position: center center;  
 `;
 
 const BoardContainer = styled.div`
@@ -41,28 +47,28 @@ const BombIcon = styled(FontAwesomeIcon)`
 
 const GameBoard = styled.div`
   display: grid;
-  grid-template-columns: repeat(5, 50px);
-  gap: 5px;
+  grid-template-columns: repeat(5, 80px);
 `;
 
 const CellButton = styled.button`
-  width: 50px;
-  height: 50px;
-  font-size: 24px;
+  width: 80px;
+  height: 80px;
+  font-size: 38px;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
   color: ${({ value }) =>
-    value === 1 ? "blue" : value === -1 ? "red" : "black"};
+    value === 1 ? "white" : value === -1 ? "white" : "white"};
   background-color: ${({ rowIndex, colIndex, selectedRow, selectedCol }) =>
-    rowIndex === selectedRow ? "#f0f0f0" : colIndex === selectedCol ? "#f0f0f0": "#f0f0f0"};
+    rowIndex === selectedRow ? "#320066" : colIndex === selectedCol ? "#320066": "#320066"};
   background: ${({ rowIndex, colIndex, selectedRow, selectedCol }) =>
     rowIndex === selectedRow
-      ? "#f0f0f0 url('/bomb.png') no-repeat center/contain"
+      ? "#320066 url('/bomb.png') no-repeat center/contain"
       : colIndex === selectedCol
-      ? "#f0f0f0 url('/bomb.png') no-repeat center/contain"
-      : "#f0f0f0"};
-  border: 1px solid #ccc;
+      ? "#320066 url('/bomb.png') no-repeat center/contain"
+      : "#320066"};
+  border: 5px solid #73f2fa;
   transition: background-color 0.3s ease;
   visibility: ${({ value }) => (value === -2 ? "hidden" : "visible")};
   &:hover {
@@ -84,9 +90,10 @@ const NewGameButton = styled.button`
   font-size: 16px;
   padding: 10px 20px;
   margin-top: 20px;
-  background-color: #4caf50; /* Green background */
+  background-color: #fad969; /* Green background */
   border: none;
-  color: white; /* White text */
+  color: #1f1f1f; /* White text */
+  font-weight:600;
   text-align: center;
   text-decoration: none;
   display: inline-block;
@@ -95,7 +102,8 @@ const NewGameButton = styled.button`
   border-radius: 8px;
 
   &:hover {
-    background-color: #45a049; /* Darker green on hover */
+    background-color: black; /* Darker green on hover */
+    color: #fff; /* Darker green on hover */
   }
 `;
 
@@ -660,16 +668,13 @@ const App = () => {
   };
 
   return (
+    <>
+    <Player player={"AI Agent"} rowbombs={aiBombs?.row} colbombs={aiBombs?.col} side={"left"}/>
+    <Player player={"Player"} rowbombs={playerBombs?.row} colbombs={playerBombs?.col} side={"right"} />
     <AppContainer>
-      <h1 style={{ color: "green" }}>Tic-Tac-Toe with Bombs</h1>
-      <div style={{ color: "green" }}>{message}</div>
-      <div style={{ color: "blue" }}>
-        Player Bombs: Row - {playerBombs?.row}, Column - {playerBombs?.col}
-      </div>
-      <div style={{ color: "red" }}>
-        AI Bombs: Row - {aiBombs?.row}, Column - {aiBombs?.col}
-      </div>
+
       <BoardContainer>
+      <div className="turn">{message}</div>
         <GameBoard>
           {board !== null &&
             board.length === 5 &&
@@ -750,6 +755,8 @@ const App = () => {
         </NewGameButton>
       </BoardContainer>
     </AppContainer>
+    </>
+
   );
 };
 
