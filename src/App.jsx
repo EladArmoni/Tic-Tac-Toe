@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBomb } from "@fortawesome/free-solid-svg-icons";
 import { flash } from "react-animations";
 
+// Styled components for the application
 const AppContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -99,21 +100,21 @@ const NewGameButton = styled.button`
 `;
 
 const App = () => {
-  const initialPlayerBombs = { row: 1, col: 1 };
-  const initialAiBombs = { row: 1, col: 1 };
+  const initialPlayerBombs = { row: 1, col: 1 }; // Initial number of bombs for player
+  const initialAiBombs = { row: 1, col: 1 }; // Initial number of bombs for AI
 
-  const [board, setBoard] = useState(null);
-  const [bombs, setBombs] = useState(null);
-  const [conditions, setConditions] = useState([]);
-  const [playerBombs, setPlayerBombs] = useState(initialPlayerBombs);
-  const [aiBombs, setAiBombs] = useState(initialAiBombs);
-  const [turn, setTurn] = useState("Player");
-  const [message, setMessage] = useState("Player's Turn");
-  const [selectedRow, setSelectedRow] = useState(-1); // Default selected row
-  const [selectedCol, setSelectedCol] = useState(-1); // Default selected column
-  const [winner, setWinner] = useState(null); // New state for winner
-  const [rowsSet, setRowsSet] = useState([]);
-  const [colsSet, setColsSet] = useState([]);
+  const [board, setBoard] = useState(null); // Board state
+  const [bombs, setBombs] = useState(null); // Bombs state
+  const [conditions, setConditions] = useState([]); // Win conditions
+  const [playerBombs, setPlayerBombs] = useState(initialPlayerBombs); // Player bombs count
+  const [aiBombs, setAiBombs] = useState(initialAiBombs); // AI bombs count
+  const [turn, setTurn] = useState("Player"); // Current turn
+  const [message, setMessage] = useState("Player's Turn"); // Game message
+  const [selectedRow, setSelectedRow] = useState(-1); // Selected row for bomb
+  const [selectedCol, setSelectedCol] = useState(-1); // Selected column for bomb
+  const [winner, setWinner] = useState(null); // Winner state
+  const [rowsSet, setRowsSet] = useState([]); // Rows with available cells
+  const [colsSet, setColsSet] = useState([]); // Columns with available cells
 
   useEffect(() => {
     newGame();
@@ -125,6 +126,7 @@ const App = () => {
     }
   }, [board]);
 
+  // We use -2 for unavailable cells, 0 for available cells - cause we add 3 random cell around the board so this cells will be with 0 value in new game
   async function createBoard() {
     const initialBoard = [
       [-2, -2, -2, -2, -2],
@@ -256,6 +258,7 @@ const App = () => {
     enableBoard();
   }
 
+  //update the board with the current cells and states
   const updateBoard = (board, bombs, playerBombs, aiBombs) => {
     setBoard([...board]);
     setBombs([...bombs]);
@@ -263,6 +266,7 @@ const App = () => {
     setAiBombs({ ...aiBombs });
   };
 
+  //handle player click on cell and update the board
   const handleCellClick = (row, col) => {
     if (turn === "Player" && board[row][col] === 0 && bombs[row][col] === 0) {
       setMove(board, row, col, 1);
@@ -276,35 +280,47 @@ const App = () => {
       }
     }
   };
+
+  //handle AI move with the AI algorithm
   const handleAIMove = () => {
     const newBoard = [...board];
     const newBombs = [...bombs];
     const newAiBombs = { ...aiBombs };
     const newPlayerBombs = { ...playerBombs };
+    //AI use abminimax algorithm to find the best step to do
     const result = abminimax(
       newBoard,
       newBombs,
-      3,
-      -Infinity,
-      Infinity,
-      -1,
-      newPlayerBombs,
-      newAiBombs
+      3, // Depth of the minimax algorithm
+      -Infinity, // Alpha value for alpha-beta pruning
+      Infinity, // Beta value for alpha-beta pruning
+      -1, // Player value (-1 for AI, 1 for Player)
+      newPlayerBombs, // Number of bombs available to the player
+      newAiBombs // Number of bombs available to the AI
     );
+
+    // Check if the AI move is valid
     if (result[0] !== -1 && result[1] !== -1) {
+      // Check if the result includes a bomb move
       if (result[3]) {
         const [bombType, index] = result[3];
+        // Detonate the bomb based on the type (row or column) and index
         detonateBomb(newBoard, newBombs, index, bombType);
+        // Update the AI bomb count based on the type of bomb used
         bombType === "col"
           ? setAiBombs({ ...aiBombs, col: aiBombs["col"] - 1 })
           : setAiBombs({ ...aiBombs, row: aiBombs["row"] - 1 });
       } else {
+        // Make the move on the board for the AI
         setMove(newBoard, result[0], result[1], -1);
       }
+      // Check if the game has been won or if the board is full
       if (!gameWon(newBoard) && !boardFull(newBoard)) {
+        // If the game is not over, switch turn back to the player
         setTurn("Player");
         setMessage("Player's Turn");
       } else {
+        // If the game is over, check the game result
         checkGameResult(newBoard);
       }
     }
@@ -315,16 +331,20 @@ const App = () => {
 
   useEffect(function(){
     if(rowbombbutton && colbombbutton){
+        // Disable row bomb button if no row is selected
         if(selectedRow === -1){
           document.getElementById("rowBombButton").classList.add("disabled");
         }
+        // Enable row bomb button if a row is selected and player has bombs left
         else if (selectedRow !== -1 && playerBombs.row > 0){
           document.getElementById("rowBombButton").classList.remove("disabled");
   
         }
+        // Disable column bomb button if no column is selected
         if(selectedCol === -1){
           document.getElementById("colBombButton").classList.add("disabled");
         }
+        // Enable column bomb button if a column is selected and player has bombs left
         else if (selectedCol !== -1 && playerBombs.col > 0){
           document.getElementById("colBombButton").classList.remove("disabled");
   
@@ -336,27 +356,32 @@ const App = () => {
 
   const placeBomb = (type) => {
     if (type === "row" && playerBombs.row > 0) {
+      // Detonate row bomb and update player bombs count
       detonateBomb(board, bombs, selectedRow, "row");
       setPlayerBombs({ ...playerBombs, row: playerBombs.row - 1 });
       if (playerBombs.row - 1 === 0) {
         document.getElementById("rowBombButton").classList.add("disabled");
       }
     } else if (type === "col" && playerBombs.col > 0) {
+      // Detonate column bomb and update player bombs count
       detonateBomb(board, bombs, selectedCol, "col");
       setPlayerBombs({ ...playerBombs, col: playerBombs.col - 1 });
       if (playerBombs.col - 1 === 0) {
         document.getElementById("colBombButton").classList.add("disabled");
       }
     }
+    // Switch turn to AI and update message
     setTurn("AI");
     setMessage("AI's Turn");
     setTimeout(() => handleAIMove(), 500);
   };
 
+  // Check if either player has won the game
   const gameWon = (newBoard) => {
     return winningPlayer(newBoard, 1) || winningPlayer(newBoard, -1);
   };
 
+  // Check if the board is full
   const boardFull = () => {
     return board.flat().every((cell) => cell !== 0);
   };
@@ -377,6 +402,7 @@ const App = () => {
     }
   };
 
+  // Disable all cells on the board and bomb buttons
   const disableBoard = () => {
     const cells = document.querySelectorAll('button:not([value="new game"])'); // Exclude New Game button
     cells.forEach((cell) => {
@@ -385,6 +411,8 @@ const App = () => {
     document.getElementById("rowBombButton").classList.add("disabled");
     document.getElementById("colBombButton").classList.add("disabled");
   };
+
+  // Enable all cells on the board
   const enableBoard = () => {
     const cells = document.querySelectorAll('button:not([value="new game"])'); // Exclude New Game button
     cells.forEach((cell) => {
@@ -393,17 +421,20 @@ const App = () => {
 
   };
 
+  // Check if the given player has won based on conditions
   const winningPlayer = (newBoard, player) => {
     return conditions.some((condition) =>
       condition.every(([x, y]) => newBoard[x][y] === player)
     );
   };
 
+  // Set the move for the given player on the board
   const setMove = (newBoard, x, y, player) => {
     newBoard[x][y] = player;
     setBoard(newBoard);
   };
 
+  // Detonate row bomb and update board and bombs states
   const detonateBomb = (newBoard, newBombs, index, bomb_type) => {
     if (bomb_type === "row") {
       for (let i = 0; i < 5; i++) {
@@ -414,9 +445,10 @@ const App = () => {
           newBoard[index][i] = 0;
           newBombs[index][i] = 0;
         }
-        addBombAnimation(index, i); // Add animation
+        addBombAnimation(index, i); // Add animation to the bomb
       }
     } else if (bomb_type === "col") {
+      // Detonate column bomb and update board and bombs states
       for (let i = 0; i < 5; i++) {
         if (newBoard[i][index] === -2) {
           newBoard[i][index] = -2;
@@ -445,6 +477,7 @@ const App = () => {
     }
   };
 
+  // Heuristic function to evaluate the board
   const heuristic = (newBoard) => {
     if (winningPlayer(newBoard, 1)) {
       return 1;
@@ -454,24 +487,28 @@ const App = () => {
       return 0;
     }
   };
+
+  // Alpha-beta minimax algorithm to determine the best move
   const abminimax = (
-    newBoard,
-    newBombs,
-    depth,
-    alpha,
-    beta,
-    player,
-    newPlayerBombs,
-    newAiBombs
-  ) => {
+    newBoard, // Current state of the board
+    newBombs, // Current state of the bombs
+    depth, // Depth of the minimax algorithm
+    alpha, // Alpha value for alpha-beta pruning
+    beta,  // Beta value for alpha-beta pruning
+    player, // Current player (-1 for AI, 1 for Player)
+    newPlayerBombs, // Number of bombs available to the player
+    newAiBombs // Number of bombs available to the AI 
+  ) => { 
     let row = -1;
     let col = -1;
     let bombMove = null;
+
+    // Base case: if depth is 0 or the game is won
     if (depth === 0 || gameWon(newBoard)) {
       return [row, col, heuristic(newBoard)];
     } else {
       for (let cell of blanks(newBoard)) {
-        setMove(newBoard, cell[0], cell[1], player);
+        setMove(newBoard, cell[0], cell[1], player); // Make the move
         let score = abminimax(
           newBoard,
           newBombs,
@@ -481,31 +518,31 @@ const App = () => {
           -player,
           newPlayerBombs,
           newAiBombs
-        )[2];
-        newBoard[cell[0]][cell[1]] = 0;
-        if (player === 1) {
+        )[2]; // Recursively call minimax
+        newBoard[cell[0]][cell[1]] = 0; // Undo the move
+        if (player === 1) { // Maximizing player
           if (score > alpha) {
             alpha = score;
             row = cell[0];
             col = cell[1];
           }
-        } else {
+        } else { // Minimizing player
           if (score < beta) {
             beta = score;
             row = cell[0];
             col = cell[1];
           }
         }
-        if (alpha >= beta) break;
+        if (alpha >= beta) break; // Alpha-beta pruning
       }
-      // Consider using bombs
+      // Consider using bombs for the player
       if (player === 1 && newPlayerBombs.row > 0) {
         for (let i = 0; i < 5; i++) {
           if (
             newBombs[i].some((bomb, j) => bomb === 0 && newBoard[i][j] !== 0)
           ) {
             const tempRow = [...newBoard[i]];
-            detonateBomb(newBoard, newBombs, i, "row");
+            detonateBomb(newBoard, newBombs, i, "row"); // Detonate row bomb
             let score = abminimax(
               newBoard,
               newBombs,
@@ -516,7 +553,7 @@ const App = () => {
               { row: newPlayerBombs.row - 1, col: newPlayerBombs.col },
               newAiBombs
             )[2];
-            newBoard[i] = tempRow;
+            newBoard[i] = tempRow; // Undo the bomb
             if (score > alpha) {
               alpha = score;
               bombMove = ["row", i];
@@ -530,7 +567,7 @@ const App = () => {
         for (let j = 0; j < 5; j++) {
           if (newBombs.some((row, i) => row[j] === 0 && newBoard[i][j] !== 0)) {
             const tempCol = newBoard.map((row) => row[j]);
-            detonateBomb(newBoard, newBombs, j, "col");
+            detonateBomb(newBoard, newBombs, j, "col"); // Detonate column bomb
             let score = abminimax(
               newBoard,
               newBombs,
@@ -541,7 +578,7 @@ const App = () => {
               { row: newPlayerBombs.row, col: newPlayerBombs.col - 1 },
               newAiBombs
             )[2];
-            for (let i = 0; i < 5; i++) newBoard[i][j] = tempCol[i];
+            for (let i = 0; i < 5; i++) newBoard[i][j] = tempCol[i]; // Undo the bomb
             if (score > alpha) {
               alpha = score;
               bombMove = ["col", j];
@@ -551,6 +588,7 @@ const App = () => {
         }
       }
 
+      // Consider using bombs for the AI
       if (player === -1 && newAiBombs.row > 0) {
         for (let i = 0; i < 5; i++) {
           if (
@@ -608,6 +646,7 @@ const App = () => {
     }
   };
 
+  // Function to find all blank cells on the board
   const blanks = (newBoard) => {
     const moves = [];
     for (let i = 0; i < newBoard.length; i++) {
@@ -619,8 +658,6 @@ const App = () => {
     }
     return moves;
   };
-
-
 
   return (
     <AppContainer>
