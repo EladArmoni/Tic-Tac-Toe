@@ -1,6 +1,6 @@
 ## Getting Started
 
-The project aims to create an online Tic-Tac-Toe game using React. The game includes basic functions like starting a game, handling player moves, and determining the game results.
+The project aims to create an online Tic-Tac-Toe game using React. The game includes basic functions like starting a game, handling player moves, determining game results, and advanced features such as bombs that remove a column or a row, and random squares appearing on the board.
 
 ### Solution
 
