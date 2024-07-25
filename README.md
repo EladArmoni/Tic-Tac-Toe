@@ -34,6 +34,5 @@ The project is built using React, utilizing JavaScript, CSS, and HTML. The code 
 
 - Each player has 1 row bomb and 1 column bomb at the start.
 - Use the dropdowns to select a row or column, then click the bomb icon to clear it.
-- Bombs cannot be placed on already cleared cells.
 
 4. **Winning:** The game ends when a player aligns three marks in a row, column, or diagonal, or when all cells are filled resulting in a draw.
