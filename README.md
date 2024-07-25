@@ -1,70 +1,38 @@
-# Getting Started with Create React App
+## Getting Started
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is a unique and fun twist on the classic Tic-Tac-Toe game, implemented in React with additional features like bombs and AI opponent. The game allows players to place bombs that can clear rows or columns, adding an extra layer of strategy to the gameplay.
 
-## Available Scripts
+### Features
 
-In the project directory, you can run:
+- **Classic Tic-Tac-Toe Gameplay:** Play the traditional 3x3 game on a 5x5 grid with added complexity.
+- **Bombs:** Each player (both human and AI) gets bombs (1 for row and 1 for col) that can clear entire rows or columns.
+- **AI Opponent:** The AI uses the Minimax algorithm with alpha-beta pruning to make strategic moves.
+- **Random Cell Initialization:** At the start of the game, three cells are randomly selected and blocked.
+- **Responsive Design:** The game is designed to be responsive and interactive.
 
-### `npm start`
+### Solution
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+The project is built using React, utilizing JavaScript, CSS, and HTML. The code includes components that enable the full functionality of the game, including move recognition, win detection, and the implementation of bombs and random squares.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Installation
 
-### `npm test`
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/EladArmoni/Tic-Tac-Toe.git
+   cd Tic-Tac-Toe
+   ```
+2. Install the dependencies:
+   `npm install`
+3. Start the application:
+   `npm start`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Game Rules
 
-### `npm run build`
+1. **Objective:** The goal is to align three of your marks (X for Player, O for AI) in a row, column, or diagonal.
+2. **Turns:** Players take turns placing their marks on the board.
+3. **Bombs:**
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- Each player has 1 row bomb and 1 column bomb at the start.
+- Use the dropdowns to select a row or column, then click the bomb icon to clear it.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+4. **Winning:** The game ends when a player aligns three marks in a row, column, or diagonal, or when all cells are filled resulting in a draw.
