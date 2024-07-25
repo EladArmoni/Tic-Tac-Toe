@@ -14,7 +14,7 @@ const AppContainer = styled.div`
   height: 100vh;
   background-color:#4d04a5;
   background: url("/bg3.jpeg");
-      background-size:     cover;                      /* <------ */
+      background-size:     cover;                   
     background-repeat:   no-repeat;
     background-position: center center;  
 `;
