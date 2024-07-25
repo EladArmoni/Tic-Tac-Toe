@@ -36,3 +36,11 @@ The project is built using React, utilizing JavaScript, CSS, and HTML. The code 
 - Use the dropdowns to select a row or column, then click the bomb icon to clear it.
 
 4. **Winning:** The game ends when a player aligns three marks in a row, column, or diagonal, or when all cells are filled resulting in a draw.
+
+### Links
+1. PPT in Canva: https://www.canva.com/design/DAGL8LkWOmM/g4n7Lr7yPUdn0x0wUnTDUA/edit?utm_content=DAGL8LkWOmM&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
+2. PPT Video: https://www.youtube.com/watch?v=HIGbxwxMcqM
+3. Game in Vercel: https://tic-tac-toe-iota-two-32.vercel.app/
+4. Game Video: https://youtu.be/KPMyYc7iJF4
+
+
