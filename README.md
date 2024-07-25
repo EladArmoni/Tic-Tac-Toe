@@ -4,7 +4,7 @@ The project aims to create an online Tic-Tac-Toe game using React. The game incl
 
 ### Solution
 
-The project is built using React, utilizing JavaScript, CSS, and HTML. The code includes components that enable the full functionality of the game, including move recognition and win detection.
+The project is built using React, utilizing JavaScript, CSS, and HTML. The code includes components that enable the full functionality of the game, including move recognition, win detection, and the implementation of bombs and random squares.
 
 ### Installation
 
